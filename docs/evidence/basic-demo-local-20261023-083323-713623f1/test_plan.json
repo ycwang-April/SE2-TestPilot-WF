@@ -1,0 +1,24 @@
+[
+  {
+    "target": "calculator.py",
+    "cases": [
+      {
+        "category": "normal",
+        "description": "Demo fixture: normal behavior for calculator.py",
+        "target_symbol": "calculator",
+        "input_strategy": "Use deterministic example inputs",
+        "expected_behavior": "Match the example's documented contract",
+        "priority": 1,
+        "behavior_id": "",
+        "setup": "",
+        "additional_categories": [
+          "boundary",
+          "branch",
+          "exception",
+          "interaction",
+          "invalid"
+        ]
+      }
+    ]
+  }
+]

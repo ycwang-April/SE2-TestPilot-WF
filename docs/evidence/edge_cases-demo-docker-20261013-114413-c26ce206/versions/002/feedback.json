@@ -1,0 +1,16 @@
+{
+  "failure_category": "IMPROVE_COVERAGE",
+  "diagnosis": "DEMO scripted diagnosis: IMPROVE_COVERAGE; inspect referenced tool facts",
+  "suggested_action": "IMPROVE_COVERAGE",
+  "evidence_refs": [
+    "versions/002/tests.json",
+    "versions/002/execution.json",
+    "versions/002/coverage.json"
+  ],
+  "review_required": false,
+  "uncertainty": "Fixed demo response, not real LLM reasoning",
+  "test_version": 2,
+  "execution_ref": "versions/002/execution.json",
+  "coverage_ref": "versions/002/coverage.json",
+  "diagnosis_status": "completed"
+}

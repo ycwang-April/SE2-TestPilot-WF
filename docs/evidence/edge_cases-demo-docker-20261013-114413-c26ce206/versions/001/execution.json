@@ -1,0 +1,19 @@
+{
+  "result": {
+    "returncode": 2,
+    "stdout": "\n==================================== ERRORS ====================================\n_________ ERROR collecting .testpilot/generated_tests/test_shipping.py _________\nImportError while importing test module '/work/.testpilot/generated_tests/test_shipping.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n.testpilot/generated_tests/test_shipping.py:1: in <module>\n    from shipping import shipping_fe\nE   ImportError: cannot import name 'shipping_fe' from 'shipping' (/work/shipping.py). Did you mean: 'shipping_fee'?\n=========================== short test summary info ============================\nERROR .testpilot/generated_tests/test_shipping.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.32s\n",
+    "stderr": "",
+    "traceback": "\n==================================== ERRORS ====================================\n_________ ERROR collecting .testpilot/generated_tests/test_shipping.py _________\nImportError while importing test module '/work/.testpilot/generated_tests/test_shipping.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n.testpilot/generated_tests/test_shipping.py:1: in <module>\n    from shipping import shipping_fe\nE   ImportError: cannot import name 'shipping_fe' from 'shipping' (/work/shipping.py). Did you mean: 'shipping_fee'?\n=========================== short test summary info ============================\nERROR .testpilot/generated_tests/test_shipping.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.32s\n\n",
+    "backend": "docker",
+    "timed_out": false,
+    "passed": 0,
+    "failed": 0,
+    "errors": 1,
+    "skipped": 0,
+    "collected_test_cases": 0,
+    "duration_seconds": 7.684267700067721,
+    "coverage_data": null,
+    "warnings": []
+  },
+  "environment_error": null
+}

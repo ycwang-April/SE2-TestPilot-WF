@@ -1,0 +1,80 @@
+[
+  {
+    "message_id": "70c777a38458422f93dd76a310f9beb0",
+    "sender": "generation",
+    "receiver": "execution",
+    "message_type": "generation_result",
+    "test_version": 1,
+    "sequence": 1,
+    "evidence_refs": [
+      "versions/001/tests.json"
+    ],
+    "payload": {
+      "mode": "INITIAL_GENERATION",
+      "test_version": 1,
+      "test_plan": [
+        {
+          "target": "shipping.py",
+          "cases": [
+            {
+              "category": "normal",
+              "description": "Demo fixture: normal behavior for shipping.py",
+              "target_symbol": "shipping",
+              "input_strategy": "Use deterministic example inputs",
+              "expected_behavior": "Match the example's documented contract",
+              "priority": 1,
+              "behavior_id": "",
+              "setup": "",
+              "additional_categories": [
+                "boundary",
+                "branch",
+                "exception",
+                "interaction",
+                "invalid"
+              ]
+            }
+          ]
+        }
+      ],
+      "tests_ref": "versions/001/tests.json",
+      "digest": "8ae678cf35e76d10827550eb5325090c6fc1a9cb4624e58243dd2194eafe3bda",
+      "summary": "INITIAL_GENERATION: committed version 1",
+      "warnings": [
+        "Plan deduplicated: shipping.py: shipping (boundary)",
+        "Plan deduplicated: shipping.py: shipping (exception)",
+        "Plan deduplicated: shipping.py: shipping (invalid)",
+        "Plan deduplicated: shipping.py: shipping (branch)",
+        "Plan deduplicated: shipping.py: shipping (interaction)"
+      ]
+    }
+  },
+  {
+    "message_id": "a0179bee3e66403691ebb21af4a83869",
+    "sender": "execution",
+    "receiver": "generation",
+    "message_type": "execution_feedback",
+    "test_version": 1,
+    "sequence": 2,
+    "evidence_refs": [
+      "versions/001/tests.json",
+      "versions/001/execution.json",
+      "versions/001/coverage.json"
+    ],
+    "payload": {
+      "failure_category": "REPAIR_TEST",
+      "diagnosis": "DEMO scripted diagnosis: REPAIR_TEST; inspect referenced tool facts",
+      "suggested_action": "REPAIR_TEST",
+      "evidence_refs": [
+        "versions/001/tests.json",
+        "versions/001/execution.json",
+        "versions/001/coverage.json"
+      ],
+      "review_required": false,
+      "uncertainty": "Fixed demo response, not real LLM reasoning",
+      "test_version": 1,
+      "execution_ref": "versions/001/execution.json",
+      "coverage_ref": "versions/001/coverage.json",
+      "diagnosis_status": "completed"
+    }
+  }
+]

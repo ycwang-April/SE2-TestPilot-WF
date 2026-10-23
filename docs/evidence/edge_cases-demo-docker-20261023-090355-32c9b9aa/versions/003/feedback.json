@@ -1,0 +1,16 @@
+{
+  "failure_category": "PASS",
+  "diagnosis": "DEMO scripted diagnosis: PASS; inspect referenced tool facts",
+  "suggested_action": "PASS",
+  "evidence_refs": [
+    "versions/003/tests.json",
+    "versions/003/execution.json",
+    "versions/003/coverage.json"
+  ],
+  "review_required": false,
+  "uncertainty": "Fixed demo response, not real LLM reasoning",
+  "test_version": 3,
+  "execution_ref": "versions/003/execution.json",
+  "coverage_ref": "versions/003/coverage.json",
+  "diagnosis_status": "completed"
+}

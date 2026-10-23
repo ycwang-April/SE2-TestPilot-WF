@@ -1,0 +1,80 @@
+[
+  {
+    "message_id": "7207313a664944e98910f32ca1281c74",
+    "sender": "generation",
+    "receiver": "execution",
+    "message_type": "generation_result",
+    "test_version": 1,
+    "sequence": 1,
+    "evidence_refs": [
+      "versions/001/tests.json"
+    ],
+    "payload": {
+      "mode": "INITIAL_GENERATION",
+      "test_version": 1,
+      "test_plan": [
+        {
+          "target": "calculator.py",
+          "cases": [
+            {
+              "category": "normal",
+              "description": "Demo fixture: normal behavior for calculator.py",
+              "target_symbol": "calculator",
+              "input_strategy": "Use deterministic example inputs",
+              "expected_behavior": "Match the example's documented contract",
+              "priority": 1,
+              "behavior_id": "",
+              "setup": "",
+              "additional_categories": [
+                "boundary",
+                "branch",
+                "exception",
+                "interaction",
+                "invalid"
+              ]
+            }
+          ]
+        }
+      ],
+      "tests_ref": "versions/001/tests.json",
+      "digest": "315ffa2465646d244020c70dafb6d582b7ba727ba93cad9e64ebbde6da6771d6",
+      "summary": "INITIAL_GENERATION: committed version 1",
+      "warnings": [
+        "Plan deduplicated: calculator.py: calculator (boundary)",
+        "Plan deduplicated: calculator.py: calculator (exception)",
+        "Plan deduplicated: calculator.py: calculator (invalid)",
+        "Plan deduplicated: calculator.py: calculator (branch)",
+        "Plan deduplicated: calculator.py: calculator (interaction)"
+      ]
+    }
+  },
+  {
+    "message_id": "464f5ce1977f43259181822f8d21ba4f",
+    "sender": "execution",
+    "receiver": "generation",
+    "message_type": "execution_feedback",
+    "test_version": 1,
+    "sequence": 2,
+    "evidence_refs": [
+      "versions/001/tests.json",
+      "versions/001/execution.json",
+      "versions/001/coverage.json"
+    ],
+    "payload": {
+      "failure_category": "PASS",
+      "diagnosis": "DEMO scripted diagnosis: PASS; inspect referenced tool facts",
+      "suggested_action": "PASS",
+      "evidence_refs": [
+        "versions/001/tests.json",
+        "versions/001/execution.json",
+        "versions/001/coverage.json"
+      ],
+      "review_required": false,
+      "uncertainty": "Fixed demo response, not real LLM reasoning",
+      "test_version": 1,
+      "execution_ref": "versions/001/execution.json",
+      "coverage_ref": "versions/001/coverage.json",
+      "diagnosis_status": "completed"
+    }
+  }
+]

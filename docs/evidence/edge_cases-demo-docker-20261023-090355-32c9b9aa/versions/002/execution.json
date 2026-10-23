@@ -1,0 +1,286 @@
+{
+  "result": {
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n================================ tests coverage ================================\n_______________ coverage: platform linux, python 3.13.16-final-0 _______________\n\nCoverage JSON written to file .testpilot/coverage.json\n1 passed in 0.36s\n",
+    "stderr": "",
+    "traceback": "",
+    "backend": "docker",
+    "timed_out": false,
+    "passed": 1,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "collected_test_cases": 1,
+    "duration_seconds": 1.1951963999890722,
+    "coverage_data": {
+      "meta": {
+        "format": 3,
+        "version": "7.16.2",
+        "timestamp": "2026-10-23T01:04:06.260924",
+        "branch_coverage": true,
+        "show_contexts": false
+      },
+      "files": {
+        "shipping.py": {
+          "executed_lines": [
+            1,
+            3,
+            5,
+            6,
+            11,
+            13
+          ],
+          "summary": {
+            "covered_lines": 6,
+            "num_statements": 11,
+            "percent_covered": 47.36842105263158,
+            "percent_covered_display": "47",
+            "missing_lines": 5,
+            "excluded_lines": 0,
+            "percent_statements_covered": 54.54545454545455,
+            "percent_statements_covered_display": "55",
+            "num_branches": 8,
+            "num_partial_branches": 3,
+            "covered_branches": 3,
+            "missing_branches": 5,
+            "percent_branches_covered": 37.5,
+            "percent_branches_covered_display": "38"
+          },
+          "missing_lines": [
+            4,
+            7,
+            8,
+            10,
+            12
+          ],
+          "excluded_lines": [],
+          "executed_branches": [
+            [
+              3,
+              5
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              11,
+              13
+            ]
+          ],
+          "missing_branches": [
+            [
+              3,
+              4
+            ],
+            [
+              5,
+              7
+            ],
+            [
+              7,
+              8
+            ],
+            [
+              7,
+              10
+            ],
+            [
+              11,
+              12
+            ]
+          ],
+          "functions": {
+            "shipping_fee": {
+              "executed_lines": [
+                3,
+                5,
+                6,
+                11,
+                13
+              ],
+              "summary": {
+                "covered_lines": 5,
+                "num_statements": 10,
+                "percent_covered": 44.44444444444444,
+                "percent_covered_display": "44",
+                "missing_lines": 5,
+                "excluded_lines": 0,
+                "percent_statements_covered": 50.0,
+                "percent_statements_covered_display": "50",
+                "num_branches": 8,
+                "num_partial_branches": 3,
+                "covered_branches": 3,
+                "missing_branches": 5,
+                "percent_branches_covered": 37.5,
+                "percent_branches_covered_display": "38"
+              },
+              "missing_lines": [
+                4,
+                7,
+                8,
+                10,
+                12
+              ],
+              "excluded_lines": [],
+              "start_line": 1,
+              "executed_branches": [
+                [
+                  3,
+                  5
+                ],
+                [
+                  5,
+                  6
+                ],
+                [
+                  11,
+                  13
+                ]
+              ],
+              "missing_branches": [
+                [
+                  3,
+                  4
+                ],
+                [
+                  5,
+                  7
+                ],
+                [
+                  7,
+                  8
+                ],
+                [
+                  7,
+                  10
+                ],
+                [
+                  11,
+                  12
+                ]
+              ]
+            },
+            "": {
+              "executed_lines": [
+                1
+              ],
+              "summary": {
+                "covered_lines": 1,
+                "num_statements": 1,
+                "percent_covered": 100.0,
+                "percent_covered_display": "100",
+                "missing_lines": 0,
+                "excluded_lines": 0,
+                "percent_statements_covered": 100.0,
+                "percent_statements_covered_display": "100",
+                "num_branches": 0,
+                "num_partial_branches": 0,
+                "covered_branches": 0,
+                "missing_branches": 0,
+                "percent_branches_covered": 100.0,
+                "percent_branches_covered_display": "100"
+              },
+              "missing_lines": [],
+              "excluded_lines": [],
+              "start_line": 1,
+              "executed_branches": [],
+              "missing_branches": []
+            }
+          },
+          "classes": {
+            "": {
+              "executed_lines": [
+                1,
+                3,
+                5,
+                6,
+                11,
+                13
+              ],
+              "summary": {
+                "covered_lines": 6,
+                "num_statements": 11,
+                "percent_covered": 47.36842105263158,
+                "percent_covered_display": "47",
+                "missing_lines": 5,
+                "excluded_lines": 0,
+                "percent_statements_covered": 54.54545454545455,
+                "percent_statements_covered_display": "55",
+                "num_branches": 8,
+                "num_partial_branches": 3,
+                "covered_branches": 3,
+                "missing_branches": 5,
+                "percent_branches_covered": 37.5,
+                "percent_branches_covered_display": "38"
+              },
+              "missing_lines": [
+                4,
+                7,
+                8,
+                10,
+                12
+              ],
+              "excluded_lines": [],
+              "start_line": 1,
+              "executed_branches": [
+                [
+                  3,
+                  5
+                ],
+                [
+                  5,
+                  6
+                ],
+                [
+                  11,
+                  13
+                ]
+              ],
+              "missing_branches": [
+                [
+                  3,
+                  4
+                ],
+                [
+                  5,
+                  7
+                ],
+                [
+                  7,
+                  8
+                ],
+                [
+                  7,
+                  10
+                ],
+                [
+                  11,
+                  12
+                ]
+              ]
+            }
+          }
+        }
+      },
+      "totals": {
+        "covered_lines": 6,
+        "num_statements": 11,
+        "percent_covered": 47.36842105263158,
+        "percent_covered_display": "47",
+        "missing_lines": 5,
+        "excluded_lines": 0,
+        "percent_statements_covered": 54.54545454545455,
+        "percent_statements_covered_display": "55",
+        "num_branches": 8,
+        "num_partial_branches": 3,
+        "covered_branches": 3,
+        "missing_branches": 5,
+        "percent_branches_covered": 37.5,
+        "percent_branches_covered_display": "38"
+      }
+    },
+    "warnings": []
+  },
+  "environment_error": null
+}

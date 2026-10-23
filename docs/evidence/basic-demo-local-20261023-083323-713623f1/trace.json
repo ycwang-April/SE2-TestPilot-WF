@@ -1,0 +1,56 @@
+[
+  {
+    "step": 1,
+    "agent": "generation",
+    "task": "INITIAL_GENERATION",
+    "test_version": 1,
+    "status": "COMPLETED",
+    "input_message": null,
+    "output_messages": [
+      "96571f1d19db4426a67d260bdda245e7"
+    ],
+    "repair_count": 0,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "DEMO_FIXED_RESPONSE",
+    "llm_calls": [],
+    "evidence_refs": [
+      "versions/001/tests.json",
+      "rejected/000-attempt-01.json",
+      "generation_attempts/000/accepted-02.json"
+    ]
+  },
+  {
+    "step": 2,
+    "agent": "execution",
+    "task": "PREFLIGHT/EXECUTE/DIAGNOSE",
+    "test_version": 1,
+    "status": "COMPLETED",
+    "input_message": "96571f1d19db4426a67d260bdda245e7",
+    "output_messages": [
+      "4354733b5ef04cb09432c4d51c6101b7"
+    ],
+    "repair_count": 0,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "DEMO_FIXED_RESPONSE",
+    "llm_calls": [],
+    "evidence_refs": [
+      "versions/001/tests.json",
+      "versions/001/execution.json",
+      "versions/001/coverage.json"
+    ]
+  },
+  {
+    "step": 3,
+    "agent": "controller",
+    "test_version": 1,
+    "decision": {
+      "workflow_status": "FINISH",
+      "route": "end",
+      "reason": "Real pytest and required coverage accepted by independent diagnosis"
+    },
+    "repair_count": 0,
+    "coverage_round": 0
+  }
+]

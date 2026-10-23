@@ -1,0 +1,88 @@
+{
+  "project": "basic",
+  "status": "FINISH",
+  "demo": true,
+  "reason": "Real pytest and required coverage accepted by independent diagnosis",
+  "error": null,
+  "test_version": 1,
+  "repair_rounds": 0,
+  "coverage_rounds": 0,
+  "execution_backend": "local",
+  "execution": {
+    "returncode": 0,
+    "stdout": ".......                                                                  [100%]\r\n=============================== tests coverage ================================\r\n______________ coverage: platform win32, python 3.13.16-final-0 _______________\r\n\r\nCoverage JSON written to file .testpilot/coverage.json\r\n7 passed in 0.09s\r\n",
+    "stderr": "",
+    "traceback": "",
+    "backend": "local",
+    "timed_out": false,
+    "passed": 7,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "collected_test_cases": 7,
+    "duration_seconds": 0.6469611000502482,
+    "warnings": [
+      "host isolation disabled: LocalRunner 只适用于可信代码"
+    ]
+  },
+  "coverage": {
+    "line_coverage": 100.0,
+    "branch_coverage": 100.0,
+    "missing_lines": {
+      "calculator.py": []
+    },
+    "missing_branches": {
+      "calculator.py": []
+    }
+  },
+  "feedback": {
+    "failure_category": "PASS",
+    "diagnosis": "DEMO scripted diagnosis: PASS; inspect referenced tool facts",
+    "suggested_action": "PASS",
+    "evidence_refs": [
+      "versions/001/tests.json",
+      "versions/001/execution.json",
+      "versions/001/coverage.json"
+    ],
+    "review_required": false,
+    "uncertainty": "Fixed demo response, not real LLM reasoning",
+    "test_version": 1,
+    "execution_ref": "versions/001/execution.json",
+    "coverage_ref": "versions/001/coverage.json",
+    "diagnosis_status": "completed"
+  },
+  "model_calls": [],
+  "config": {
+    "llm": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "max_retries": 2,
+      "timeout_seconds": 60,
+      "max_tokens": 16384
+    },
+    "execution": {
+      "preferred_runner": "local",
+      "allow_local_fallback": false,
+      "timeout_seconds": 30,
+      "install_dependencies": false,
+      "install_timeout_seconds": 180,
+      "docker_image": "testpilot-runner:latest"
+    },
+    "agent": {
+      "max_repair_rounds": 2,
+      "context_max_chars": 60000
+    },
+    "coverage": {
+      "enabled": true,
+      "line_threshold": 80,
+      "branch_threshold": 70,
+      "max_improvement_rounds": 2
+    }
+  },
+  "limitations": [
+    "Snapshots are evidence, not resumable checkpoints",
+    "Only generated tests execute; original test suite is preserved",
+    "Static preflight is not a security sandbox; Local is for trusted code",
+    "Assertion preservation is conservative, not proof of semantic correctness"
+  ]
+}
