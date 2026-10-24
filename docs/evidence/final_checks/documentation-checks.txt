@@ -1,0 +1,11 @@
+Documentation/evidence checks; no runtime source imports or model calls.
+Markdown: 9 files; 105 relative link targets/fragments valid; 0 broken links or undefined references.
+README Mermaid: restricted common-syntax/structure check passed; 10 nodes, 13 edges, one workflow subgraph, three color classes, two independent budget loops.
+Design Mermaid: restricted common-syntax/structure check passed; 7 participants, 13 call/state-update arrows; loop/alt/end balanced.
+Rendering limitation: Mermaid CLI/package not available locally. These are lexical/structural checks, NOT a Mermaid renderer/parser result. No local SVG or GitHub visual rendering verified.
+CLI flags/model agree with source/config; UI typography detail removed; documented Python example parses without execution.
+Existing experiments: 5 reports and 7 version digests/references consistent. Metrics: [{"project": "advanced_project", "demo": false, "passed": 127, "collected": 127, "line": 99.19354838709677, "branch": 100.0, "version": 1}, {"project": "basic", "demo": false, "passed": 14, "collected": 14, "line": 100.0, "branch": 100.0, "version": 1}, {"project": "edge_cases", "demo": false, "passed": 19, "collected": 19, "line": 100.0, "branch": 100.0, "version": 1}, {"project": "edge_cases", "demo": true, "passed": 9, "collected": 9, "line": 100.0, "branch": 100.0, "version": 3}, {"project": "multi_module", "demo": false, "passed": 48, "collected": 48, "line": 100.0, "branch": 100.0, "version": 1}]
+MockAgent original text unchanged after UTF-16 LE BOM -> UTF-8 no BOM conversion; 24 PASSED / 36 deselected preserved.
+Protected files unchanged: 194 files; aggregate SHA-256 f9a2d57d4ab4a3bd23339128012ae190ebfbf3a4128f9c1ee38cea5e82104a04. Includes runtime source, test implementations, configuration, five experiment records and video. Caches/runs excluded; no credential content read.
+Known pytest failure confirmed: UI-state fixture hard-codes the removed 2026-10-13 evidence path. Test/evidence not repaired or substituted in this maintenance task.
+All final_checks logs decode as UTF-8 without BOM. No paid API calls or modifications to original Real/Demo evidence/video.

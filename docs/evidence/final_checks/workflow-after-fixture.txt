@@ -1,0 +1,13 @@
+Phase: after stable UI fixture repair
+Started (Asia/Shanghai): 2026-10-24T22:40:43+08:00
+Command: python -m pytest tests/wf -q
+Paid integration and .env loading disabled.
+
+........................................................................ [ 48%]
+........................................................................ [ 96%]
+.....                                                                    [100%]
+149 passed in 63.50s (0:01:03)
+
+Finished (Asia/Shanghai): 2026-10-24T22:41:48+08:00
+Elapsed seconds: 65.13
+[exit_code] 0

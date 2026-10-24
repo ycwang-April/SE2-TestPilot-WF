@@ -16,10 +16,7 @@ from testpilot_wf.ui_state import (
     timeline_rows,
 )
 
-EVIDENCE = (
-    Path(__file__).resolve().parents[2]
-    / "docs/evidence/edge_cases-demo-docker-20261013-114413-c26ce206"
-)
+LOOP_FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "ui_loop"
 
 
 def test_initial_nodes_pending():
@@ -93,7 +90,9 @@ def test_invalid_report_is_not_success(tmp_path):
 
 
 def test_actual_loop_history_and_messages_rebuilt_from_artifacts():
-    view = load_run(EVIDENCE)
+    view = load_run(LOOP_FIXTURE)
+    assert view["issues"] == []
+    assert view["report_ready"] and view["test_version"] == 3
     rows = timeline_rows(view)
     assert len(rows) == len(view["trace"]) + 1 == 10
     assert [r["任务 / 阶段"] for r in rows if r["节点"] == "Generation Agent"] == [

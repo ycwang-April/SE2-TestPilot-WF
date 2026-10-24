@@ -1,0 +1,10 @@
+Phase: after stable UI fixture repair
+Started (Asia/Shanghai): 2026-10-24T22:43:52+08:00
+Command: python -m ruff check .
+Paid integration and .env loading disabled.
+
+All checks passed!
+
+Finished (Asia/Shanghai): 2026-10-24T22:43:52+08:00
+Elapsed seconds: 0.12
+[exit_code] 0

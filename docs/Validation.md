@@ -1,10 +1,10 @@
 # 实验与验证记录
 
-核对日期：2026-10-24。本页只引用当前仓库中仍存在的源码和原始证据；本轮仅整理文档，未重新运行模型请求、Docker、pytest 或 Ruff。旧 evidence 目录与对应历史测试日志已不存在，原先依赖它们的结论和链接不再作为当前验收记录。
+核对日期：2026-10-24。本页引用当前仓库中仍存在的源码和证据。最新一轮将 UI 历史记录测试迁移到稳定 fixture，并执行专项、Workflow、完整 pytest 与 Ruff 检查；未发起付费模型调用或重跑五组 Real/Demo 实验。此前文档维护和日志编码核验记录继续保留；旧证据路径依赖的修复及前后结果见第 5 节。
 
 ## 1. 证据范围与统计口径
 
-现存材料包括四组 Real DeepSeek + Docker、一组 Demo + Docker，以及一份 MockAgent 专项测试日志，入口为 [evidence/](evidence/)。
+现存材料包括四组 Real DeepSeek + Docker、一组 Demo + Docker、MockAgent 专项测试日志，以及本轮新增的 [最终检查日志](evidence/final_checks/)，入口为 [evidence/](evidence/)。
 
 - Workflow 状态、模式、后端、版本、轮数取自各组 `final_report.json`。
 - 通过率 = `execution.passed / execution.collected_test_cases × 100%`，只描述最终生成测试集；并非模型生成成功率，也不包含项目自带测试套件。
@@ -67,7 +67,7 @@ v1 为 `shipping_fe` 导入错误，不能把 0 收集的通过率写为 0% 或 
 
 ## 4. MockAgent 可扩展性专项验证
 
-原始日志为带 BOM 的 UTF-16 文本，本轮保持原编码与内容不变；若网页无法直接预览，可下载后用 PowerShell `Get-Content docs/evidence/extensibility/mock_agent_tests.txt` 读取。
+原始日志已由 UTF-16 LE（带 BOM）转换为 **UTF-8（无 BOM）**，便于 GitHub 预览。转换直接重编码原始字节解码得到的字符串，保留全部文本及原换行，不重新生成测试输出。转换前后均为 3047 个字符，UTF-8 文本 SHA-256 均为 `dcbbff39fc8a4b321016bd7f4987f9be05b8b870294480caead6248fadd5a657`，24 条 PASSED 与汇总完全不变；详见 [编码核验](evidence/final_checks/encoding-check.txt)。
 
 原始日志：[mock_agent_tests.txt](evidence/extensibility/mock_agent_tests.txt)。日志记录 Python 3.13.16、pytest 9.1.1；收集 60 项，选择 24 项，**24 passed，36 deselected，耗时 22.70 秒**。这些是宿主测试会话信息，不作为 Docker 内部环境版本声明。
 
@@ -88,19 +88,37 @@ v1 为 `shipping_fe` 导入错误，不能把 0 收集的通过率写为 0% 或 
 python -m pytest tests/wf/test_workflow.py -k "mock_agent or registry or extension" -v
 ```
 
-本条为供评审使用的命令，本轮文档整理未重新执行它。24 项是专项子集，不能替代全仓库回归结果；其他测试虽存在源码，不据此声称有新的已通过次数。
+该专项日志仍保留原运行记录；本轮未单独重跑上述筛选命令，相关用例包含在完整 pytest 回归中。24 项是专项子集，不能替代第 5 节的全仓库回归结果。
 
-## 5. 当前实现的其他验证入口
+## 5. 最终回归与验证入口
 
-| 主题 | 测试 / 源码入口 | 当前证据口径 |
+在当前 Python 环境于 **2026-10-24 22:40–22:43（UTC+08:00）** 顺序执行以下检查。日志均为 UTF-8、无 BOM，包含实际运行时间、命令、完整输出与退出码。pytest 显式关闭付费集成 opt-in 与 `.env` 加载，未运行真实 DeepSeek 请求；业务代码、其他测试和配置未修改。
+
+| 检查 | 实际结果 | 退出码 | 日志 |
+|---|---|---:|---|
+| `python -m pytest tests/wf/test_ui_state.py::test_actual_loop_history_and_messages_rebuilt_from_artifacts -v` | **1 passed**；1.67 秒 | 0 | [ui-fixture-focused.txt](evidence/final_checks/ui-fixture-focused.txt) |
+| `python -m pytest tests/wf -q` | **149 passed**；63.50 秒 | 0 | [workflow-after-fixture.txt](evidence/final_checks/workflow-after-fixture.txt) |
+| `python -m pytest -q` | **434 passed，3 skipped**；121.76 秒 | 0 | [pytest-after-fixture.txt](evidence/final_checks/pytest-after-fixture.txt) |
+| `python -m ruff check .` | All checks passed | 0 | [ruff-check-after-fixture.txt](evidence/final_checks/ruff-check-after-fixture.txt) |
+| `python -m ruff format --check .` | 106 files already formatted | 0 | [ruff-format-after-fixture.txt](evidence/final_checks/ruff-format-after-fixture.txt) |
+
+**已修复的历史失败**：上述 UI 用例此前固定引用已删除的 `docs/evidence/edge_cases-demo-docker-20261013-114413-c26ce206`，导致 `load_run()` 无法读取报告及 Trace，实际得到 0 行而非预期 10 行。修复前完整回归的 **433 passed、1 failed、3 skipped** 保留于 [pytest.txt](evidence/final_checks/pytest.txt)，本轮修复前的单项复现见 [ui-fixture-before.txt](evidence/final_checks/ui-fixture-before.txt)。这些是历史结果，不代表当前仍存在失败。旧目录已不存在，无法逐字段比较其内容；现存 Demo 满足原测试所要求的三轮流程。
+
+[test_ui_state.py](../tests/wf/test_ui_state.py) 现使用 [tests/fixtures/ui_loop/](../tests/fixtures/ui_loop/README.md)。fixture 的四份文件 `trace.json`、`messages.json`、`final_report.json`、`final_report.md` 均逐字节复制自 [2026-10-24 Demo](evidence/edge_cases-demo-docker-20261024-211020-dba414d0/)，仅保留 UI 加载所需文件集合：9 条 Trace、6 条正式消息、三种 Generation 模式、三种 Controller 决策及 FINISH/v3 终态均保持原样。原有 10 条断言完整保留，另加产物读取无异常、报告确认完成且版本为 v3 的检查。fixture 不依赖原实验目录，不调用模型、Docker 或网络；内部历史证据引用保持原样，不作为独立可重执行的运行目录。
+
+三个 skipped 分别为 H1/H2 两项需要显式 opt-in 与有效 Key 的付费集成测试，以及一项需要 Windows 平台权限的符号链接测试。当前回归无失败，但这三项未执行，不能据此声明它们已经通过。
+
+| 验证主题 | 测试 / 源码入口 | 本轮结果口径 |
 |---|---|---|
-| 独立诊断上下文、证据保留与预算 | [test_execution_context.py](../tests/wf/test_execution_context.py) | 已核对测试与实现存在，未在本轮重跑 |
-| 协议方向、结构化输出与断言保护 | [test_contracts.py](../tests/wf/test_contracts.py)、[test_boundaries.py](../tests/wf/test_boundaries.py) | 同上 |
-| Generation preflight 有限自修正 | [test_generation_preflight.py](../tests/wf/test_generation_preflight.py) | 同上；旧自修正运行日志已删除，不复用其历史次数 |
-| CLI 实时输出、去重、退出码与报告检查 | [test_cli.py](../tests/wf/test_cli.py) | 同上 |
-| UI 终态、重绘、表格类型与显示 | [test_ui_wf.py](../tests/wf/test_ui_wf.py)、[test_ui_state.py](../tests/wf/test_ui_state.py) | 同上；不声称当前有独立视觉截图证据 |
+| 独立诊断上下文、证据保留与预算 | [test_execution_context.py](../tests/wf/test_execution_context.py) | 已包含在本轮通过的全量 pytest 中 |
+| 协议方向、结构化输出、断言保护与安全边界 | [test_contracts.py](../tests/wf/test_contracts.py)、[test_boundaries.py](../tests/wf/test_boundaries.py) | 同上 |
+| Generation preflight 有限自修正 | [test_generation_preflight.py](../tests/wf/test_generation_preflight.py) | 同上；旧自修正专项日志不再引用 |
+| CLI 实时输出、去重、退出码与报告检查 | [test_cli.py](../tests/wf/test_cli.py) | 已包含在本轮通过的全量 pytest 中 |
+| UI 终态、重绘、类型与状态投影 | [test_ui_wf.py](../tests/wf/test_ui_wf.py)、[test_ui_state.py](../tests/wf/test_ui_state.py) | 同上；旧路径依赖已修复 |
 
-全量与静态检查命令见 [README](../README.md)。现存 evidence 中没有全量 pytest/Ruff 的完整日志，故本页不沿用先前文档中已失去原始文件支撑的测试总数或格式检查文件数。本轮只进行文档链接、指标与证据一致性核对，没有新增或改写实验原始材料。
+fixture 内容一致性、原断言保留、文档链接及修改范围核验见 [ui-fixture-checks.txt](evidence/final_checks/ui-fixture-checks.txt)。此前架构图、实验指标与文档核验仍保留于 [documentation-checks.txt](evidence/final_checks/documentation-checks.txt)；此前 Ruff 记录为 [ruff-check.txt](evidence/final_checks/ruff-check.txt) 和 [ruff-format.txt](evidence/final_checks/ruff-format.txt)，当前结果以上表为准。
+
+README 架构图使用常见 Mermaid flowchart、subgraph、classDef 和标准节点形状；Design 使用 sequenceDiagram 展开调用和状态更新，避免复制主图。此前环境未安装 Mermaid CLI 或解析包，仅进行了语法形式与结构核对，**未完成本地渲染或 GitHub 页面视觉验证**；本轮未修改架构图。
 
 ## 6. 演示材料与验收边界
 

@@ -75,7 +75,7 @@ python -m streamlit run testpilot_wf/ui.py
 4. 展开 Agent Communication 消息详情，核对 `generation_result` / `execution_feedback`、版本和证据引用；Controller 路由在 Timeline 中单独显示。
 5. 确认最终报告已生成，再查看 Results & Artifacts，下载 Markdown、生成测试 ZIP、Trace 等。
 
-真实模式应取消 Demo 勾选并配置 Key；不能把 Demo 截图作为真实 DeepSeek 调用证据。Current Status 不再重复显示版本和后端指标；最终报告生成后不会保留“正在生成最终报告”提示。Timeline 与通信的数据单元格居中，表头仍为原生左对齐，不将其作为已实现功能展示。
+真实模式应取消 Demo 勾选并配置 Key；不能把 Demo 截图作为真实 DeepSeek 调用证据。界面依据实时状态和保存产物展示执行过程，只有确认最终报告存在后才标记完成；历史消息、Trace 与报告可交叉核对。
 
 ## 5. 一分钟视频与讲解建议
 

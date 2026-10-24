@@ -1,0 +1,16 @@
+Fixture verification (Asia/Shanghai): 2026-10-24T22:42:17+08:00
+Method: byte/hash comparison, JSON and Python AST inspection; no runtime source imports or external calls.
+trace.json: 3832 bytes; SHA-256 27df4ed61990b494b454327290d84f5a2f2bf35cd89464e5fbaf061568afb9b9; byte-identical to saved Demo.
+messages.json: 7910 bytes; SHA-256 ee3f5a8d15cfc78b6a973b4b462c9d0f6d40e10404fe2dc48e2b33dae3d98824; byte-identical to saved Demo.
+final_report.json: 2724 bytes; SHA-256 56e6debb4b90bd112650a2805e1bee621f70aad5a172e82a15a41be244f60302; byte-identical to saved Demo.
+final_report.md: 2970 bytes; SHA-256 acf9a42aec13bb1483541bbd2202c0f17a2baa04825113da09628b50eebe85c3; byte-identical to saved Demo.
+Data shape: original 9 Trace records, 6 formal messages; preserved modes, decisions, directions, versions, feedback and FINISH v3. No events synthesized.
+All 10 original assertion ASTs preserved in the same order; added 2 checks for readable artifacts/report-ready v3. Test module no longer references docs/evidence.
+Protected baseline unchanged: 196 files, aggregate SHA-256 6a4243829432c3db588fe3e03e4f53800f8a8a1d35e35853b33781378fcd446c. Includes business code, all other test implementations, configuration, Design/Demo documents, existing Real/Demo evidence, MockAgent log and video.
+Fixture references to versions/ remain original historical values; this is a four-file UI projection fixture, not a complete execution/replay directory.
+
+Final documentation and scope check (Asia/Shanghai): 2026-10-24T22:47:34+08:00
+Markdown relative links/references/anchors: 141 checked across README, Design, Validation, Demo and both fixture Markdown files; 0 failures.
+Protected files after all checks and document updates: 196; SHA-256 6a4243829432c3db588fe3e03e4f53800f8a8a1d35e35853b33781378fcd446c; identical to pre-repair baseline.
+Existing historical final-check logs were retained; new logs use separate filenames.
+Current regression: focused 1 passed; Workflow 149 passed; full 434 passed, 3 skipped; Ruff lint exit 0, format check exit 0 (106 files already formatted).

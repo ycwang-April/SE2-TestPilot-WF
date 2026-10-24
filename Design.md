@@ -5,18 +5,38 @@
 H2 在 H1 工具层之上增加双 Agent 协作与 LangGraph 编排。Generation 与 Execution 是两个正式业务 Agent；Controller 是确定性策略函数，报告生成是 Service 的收尾逻辑，均不调用额外 LLM。
 
 ```mermaid
-flowchart TB
-    UI[CLI / Streamlit] --> Service[run_project / observer / ArtifactWriter]
-    Service --> Graph[StateGraph - WorkflowState]
-    Graph --> G[Generation Agent]
-    G --> E[Execution Agent]
-    E --> C{Deterministic Controller}
-    C -->|REPAIR_TESTS / IMPROVE_COVERAGE| G
-    C -->|FINISH / FAIL / REVIEW_REQUIRED| End([END])
-    End --> Report[Service 写入最终报告]
-    G --> Tools[H1 分析 / 上下文 / 测试编辑工具]
-    E --> Runner[Docker 或显式 Local / pytest / coverage]
+sequenceDiagram
+    participant U as CLI / Streamlit
+    participant S as Service / LangGraph
+    participant G as Generation Agent
+    participant E as Execution Agent
+    participant W as WorkflowState
+    participant C as Controller（无 LLM）
+    participant A as Artifacts
+
+    U->>S: run_project
+    loop 首轮及预算允许的后续轮次
+        S->>G: invoke：状态副本与任务模式
+        G->>W: 提交测试版本、digest 与 GenerationResult
+        Note over G,E: generation_result：Generation → Execution
+        S->>E: invoke：已提交测试与计划
+        E->>A: 保存真实 pytest / coverage 事实
+        E->>E: 独立 LLM DIAGNOSE
+        E->>W: 写入 ExecutionFeedback 与正式消息
+        Note over G,E: execution_feedback：Execution → Generation
+        S->>C: decide：读取当前事实与反馈
+        C->>W: 更新预算、模式、route 或终态
+        alt route = generation
+            C-->>S: REPAIR_TESTS / IMPROVE_COVERAGE
+        else route = end
+            C-->>S: FINISH / FAIL / REVIEW_REQUIRED
+        end
+    end
+    S->>A: 收尾：最终 JSON 与 Markdown 报告
+    S-->>U: 返回状态与产物目录
 ```
+
+此图展开默认顺序链的方法调用与状态更新；正式 AgentMessage 方向由两条 Note 标明，Controller 的方法返回不是 AgentMessage。扩展节点的前置、后置与组合链见第 6 节。
 
 核心实现：[agents.py](testpilot_wf/agents.py)、[llm.py](testpilot_wf/llm.py)、[service.py](testpilot_wf/service.py)、[workflow.py](testpilot_wf/workflow.py)。Generation 复用 H1 `AgentNodes` 的 analyze、plan、generate、repair、improve_coverage 方法，不运行 H1 的 graph、Controller 或 execute。Execution 使用既有 Runner 与 CoverageAnalyzer。H1 客户端提供可覆盖的角色 Prompt，H2 适配器分别设置独立角色约束。
 
@@ -187,6 +207,5 @@ Service 的 observer 发布节点开始/完成与 Controller 决策，Execution 
 - 只运行新生成测试，不自动运行被测项目原套件；默认不安装项目依赖，复杂项目需准备兼容执行环境。
 - Local 无宿主隔离，Docker 也不是生产级多租户沙箱；扩展 Python Agent 应被信任。环境失败不自动回退 Local。
 - 当前扩展点是有界顺序链，不支持任意 DAG、自由多 Agent 对话、并行或热插拔；保存快照不支持断点续跑。
-- 原生 Streamlit 数据单元格已居中，表头独立居中未实现；不通过高风险内部 DOM/Canvas 修改伪装成功。
 
-本轮文档整理只核对源码与现存证据，不修改实现，也不把已删除的历史日志当作当前验收结果。
+本轮不修改实现与既有运行证据；最终回归与静态检查结果单独保存，见 [Validation](docs/Validation.md)。

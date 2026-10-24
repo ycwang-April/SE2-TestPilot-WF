@@ -1,0 +1,12 @@
+{
+  "source_encoding": "UTF-16 LE with BOM",
+  "destination_encoding": "UTF-8 without BOM",
+  "original_bytes": 6096,
+  "converted_bytes": 3071,
+  "characters": 3047,
+  "text_equal": true,
+  "utf8_text_sha256_before": "dcbbff39fc8a4b321016bd7f4987f9be05b8b870294480caead6248fadd5a657",
+  "utf8_text_sha256_after": "dcbbff39fc8a4b321016bd7f4987f9be05b8b870294480caead6248fadd5a657",
+  "passed_records": 24,
+  "summary_unchanged": "24 passed, 36 deselected in 22.70s"
+}

@@ -1,0 +1,5 @@
+Command: python -m ruff format --check .
+
+104 files already formatted
+
+[exit_code] 0

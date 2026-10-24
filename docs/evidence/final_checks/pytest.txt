@@ -1,0 +1,30 @@
+Command: python -m pytest -q
+Paid integration opt-in: disabled; .env loading: disabled.
+
+ss...................................................................... [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 49%]
+..........................s............................................. [ 65%]
+.....................................................................F.. [ 82%]
+........................................................................ [ 98%]
+.....                                                                    [100%]
+================================== FAILURES ===================================
+________ test_actual_loop_history_and_messages_rebuilt_from_artifacts _________
+
+    def test_actual_loop_history_and_messages_rebuilt_from_artifacts():
+        view = load_run(EVIDENCE)
+        rows = timeline_rows(view)
+>       assert len(rows) == len(view["trace"]) + 1 == 10
+E       assert 0 == (0 + 1)
+E        +  where 0 = len([])
+E        +  and   0 = len([])
+
+tests\wf\test_ui_state.py:98: AssertionError
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\test_deepseek.py:19: Requires DEEPSEEK_API_KEY and TESTPILOT_RUN_INTEGRATION=1 (paid API)
+SKIPPED [1] tests\integration\test_wf_deepseek.py:13: Requires explicit integration opt-in and a valid DeepSeek API key
+SKIPPED [1] tests\unit\test_uploads.py:112: Creating symlinks requires platform privileges
+FAILED tests/wf/test_ui_state.py::test_actual_loop_history_and_messages_rebuilt_from_artifacts
+1 failed, 433 passed, 3 skipped in 125.02s (0:02:05)
+
+[exit_code] 1

@@ -1,0 +1,10 @@
+Phase: after stable UI fixture repair
+Started (Asia/Shanghai): 2026-10-24T22:43:52+08:00
+Command: python -m ruff format --check .
+Paid integration and .env loading disabled.
+
+106 files already formatted
+
+Finished (Asia/Shanghai): 2026-10-24T22:43:52+08:00
+Elapsed seconds: 0.11
+[exit_code] 0

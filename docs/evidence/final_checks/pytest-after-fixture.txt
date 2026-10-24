@@ -1,0 +1,21 @@
+Phase: after stable UI fixture repair
+Started (Asia/Shanghai): 2026-10-24T22:41:48+08:00
+Command: python -m pytest -q
+Paid integration and .env loading disabled.
+
+ss...................................................................... [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 49%]
+..........................s............................................. [ 65%]
+........................................................................ [ 82%]
+........................................................................ [ 98%]
+.....                                                                    [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\test_deepseek.py:19: Requires DEEPSEEK_API_KEY and TESTPILOT_RUN_INTEGRATION=1 (paid API)
+SKIPPED [1] tests\integration\test_wf_deepseek.py:13: Requires explicit integration opt-in and a valid DeepSeek API key
+SKIPPED [1] tests\unit\test_uploads.py:112: Creating symlinks requires platform privileges
+434 passed, 3 skipped in 121.76s (0:02:01)
+
+Finished (Asia/Shanghai): 2026-10-24T22:43:52+08:00
+Elapsed seconds: 123.59
+[exit_code] 0

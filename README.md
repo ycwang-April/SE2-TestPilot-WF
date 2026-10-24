@@ -11,13 +11,41 @@
 ## 核心功能与架构
 
 ```mermaid
-flowchart LR
-    S([START]) --> G[Generation Agent]
-    G -->|GenerationResult / 已提交测试版本| E[Execution Agent]
-    E -->|ExecutionFeedback / 执行证据| C{Controller}
-    C -->|REPAIR_TESTS / IMPROVE_COVERAGE 且预算允许| G
-    C -->|FINISH / FAIL / REVIEW_REQUIRED| X([END])
+flowchart TB
+    UI["CLI / Streamlit"] --> S["Service · run_project"]
+
+    subgraph WF["LangGraph Workflow"]
+        G["Generation Agent<br/>独立 LLM · 设计与编辑"]
+        E["Execution Agent<br/>独立 LLM · 执行与诊断"]
+        C{"Controller<br/>确定性路由 · 无 LLM"}
+        T(["FINISH / FAIL<br/>REVIEW_REQUIRED"])
+        W[("WorkflowState<br/>版本 · digest · AgentMessage")]
+
+        G -->|提交测试 · GenerationResult| E
+        E -->|事实与反馈| C
+        C -->|REPAIR_TESTS · Repair 预算| G
+        C -->|IMPROVE_COVERAGE · Coverage 预算| G
+        C --> T
+        G -.- W
+        E -.- W
+        C -.- W
+    end
+
+    S --> G
+    G -.-> H["H1 Tools<br/>Analysis · AST · Patch"]
+    E -.-> D["Docker Runner<br/>pytest · coverage"]
+    T --> R["Service 收尾<br/>Final Report<br/>Trace · Messages · Coverage"]
+
+    classDef agent fill:#dbeafe,stroke:#2563eb,color:#172554,stroke-width:2px;
+    classDef control fill:#ede9fe,stroke:#7c3aed,color:#2e1065,stroke-width:2px;
+    classDef support fill:#f1f5f9,stroke:#64748b,color:#0f172a;
+    class G,E agent;
+    class C control;
+    class UI,S,W,H,D,T,R support;
+    style WF fill:transparent,stroke:#94a3b8
 ```
+
+实线为执行顺序与条件路由，虚线为共享状态关联或工具依赖，不代表额外路由。正式消息为 Generation → Execution 的 `generation_result` 与 Execution → Generation 的 `execution_feedback`；Controller 读取 WorkflowState，不是消息接收 Agent。图示默认 Docker 路径，可信代码可显式选择 Local。
 
 - **独立职责**：两个角色使用独立客户端与不同 Prompt、结构化输出约束；可以使用同一 DeepSeek 模型服务，不共享角色对话。
 - **真实执行**：Execution 按 PREFLIGHT → EXECUTE → DIAGNOSE 工作，pytest/coverage 事实先保存，再提供给诊断模型。模型的 PASS 不能覆盖客观失败。
@@ -83,7 +111,7 @@ python -m streamlit run testpilot_wf/ui.py
 
 打开终端提示的本地地址。侧栏选择 Demo 或真实模式、执行后端、目标模块、覆盖率阈值及预算，再选择项目并运行。默认勾选 Demo；真实模式须取消勾选并配置 Key。Local 需要明确确认输入代码可信。
 
-Workflow 图按真实 observer / Trace 着色；Report 是报告产物的展示节点，不是额外的 LangGraph Agent。Current Status 不重复展示测试版本和后端指标，版本信息仍保留在 Timeline、通信和报告中。Timeline 与通信表的数据单元格居中，当前原生表头仍靠左；未实现表头居中。最终报告生成后清除临时提示，重新运行会重置旧状态。实现见 [ui.py](testpilot_wf/ui.py) 和 [ui_state.py](testpilot_wf/ui_state.py)。
+界面通过 Workflow、Current Status、Execution Timeline 和 Agent Communication 实时展示执行阶段、消息交付及条件路由，并提供历史证据与报告下载。Report 是 Service 报告产物的展示节点，不是额外 Agent；最终产物生成后才确认完成，重新运行会重置旧状态。实现见 [ui.py](testpilot_wf/ui.py) 和 [ui_state.py](testpilot_wf/ui_state.py)。
 
 ## 实验结果概览
 
@@ -110,7 +138,7 @@ python -m ruff check .
 python -m ruff format --check .
 ```
 
-现存 [MockAgent 原始日志](docs/evidence/extensibility/mock_agent_tests.txt) 记录 **24 passed，36 deselected**；这不是全仓库测试总数。本轮文档核对没有重新执行 pytest、Ruff 或 API 实验，不使用已删除日志中的历史全量次数作为当前验收证据。
+现存 [MockAgent 原始日志](docs/evidence/extensibility/mock_agent_tests.txt) 记录 **24 passed，36 deselected**；这不是全仓库测试总数。最新全量回归为 **434 passed、3 skipped**；Workflow 专项 **149 passed**，Ruff lint 与 format check 均通过。UI 历史记录测试已改用稳定的仓库内 fixture，保留全部原有断言，解除对可清理实验目录的依赖。修复说明、跳过原因和完整日志见 [最终检查](docs/Validation.md#5-最终回归与验证入口)。本轮未调用付费 API。
 
 普通测试默认禁止外网并禁用 `.env` 加载。真实集成测试需要事先在当前进程安全设置有效 `DEEPSEEK_API_KEY`，且显式启用付费测试：
 
