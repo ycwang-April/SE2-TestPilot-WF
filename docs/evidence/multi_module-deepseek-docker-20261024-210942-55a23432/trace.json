@@ -1,0 +1,119 @@
+[
+  {
+    "step": 1,
+    "agent": "generation",
+    "task": "INITIAL_GENERATION",
+    "test_version": 1,
+    "status": "COMPLETED",
+    "input_message": null,
+    "output_messages": [
+      "3eb86d0902b549b1b93e2934d94bfbbe"
+    ],
+    "repair_count": 0,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "MODEL",
+    "llm_calls": [
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 1108,
+        "status": "completed",
+        "response_chars": 3277
+      },
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 4532,
+        "status": "completed",
+        "response_chars": 4058
+      },
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 10435,
+        "status": "completed",
+        "response_chars": 5034
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 13840,
+        "status": "completed",
+        "response_chars": 1681
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 15513,
+        "status": "completed",
+        "response_chars": 2164
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 19331,
+        "status": "completed",
+        "response_chars": 2124
+      }
+    ],
+    "evidence_refs": [
+      "versions/001/tests.json"
+    ]
+  },
+  {
+    "step": 2,
+    "agent": "execution",
+    "task": "PREFLIGHT/EXECUTE/DIAGNOSE",
+    "test_version": 1,
+    "status": "COMPLETED",
+    "input_message": "3eb86d0902b549b1b93e2934d94bfbbe",
+    "output_messages": [
+      "d0b4dadbe0f8426cb6d90b626e476d9a"
+    ],
+    "repair_count": 0,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "MODEL",
+    "llm_calls": [
+      {
+        "task": "DIAGNOSE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 22567,
+        "status": "completed",
+        "response_chars": 1287
+      }
+    ],
+    "evidence_refs": [
+      "versions/001/tests.json",
+      "versions/001/execution.json",
+      "versions/001/coverage.json"
+    ]
+  },
+  {
+    "step": 3,
+    "agent": "controller",
+    "test_version": 1,
+    "decision": {
+      "workflow_status": "FINISH",
+      "route": "end",
+      "reason": "Real pytest and required coverage accepted by independent diagnosis"
+    },
+    "repair_count": 0,
+    "coverage_round": 0
+  }
+]

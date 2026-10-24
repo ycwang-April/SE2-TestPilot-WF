@@ -1,0 +1,32 @@
+[
+  {
+    "agent": "generation",
+    "task": "PLAN",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 1178,
+    "status": "completed",
+    "response_chars": 3952
+  },
+  {
+    "agent": "generation",
+    "task": "GENERATE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 5163,
+    "status": "completed",
+    "response_chars": 1602
+  },
+  {
+    "agent": "execution",
+    "task": "DIAGNOSE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 7807,
+    "status": "completed",
+    "response_chars": 1538
+  }
+]

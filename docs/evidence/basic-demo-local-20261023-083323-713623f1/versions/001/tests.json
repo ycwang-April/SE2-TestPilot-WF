@@ -1,6 +1,0 @@
-[
-  {
-    "path": "test_calculator.py",
-    "content": "import pytest\nfrom calculator import divide, clamp\n\ndef test_divide():\n    assert divide(6, 3) == 2\n    assert divide(0, 3) == 0\n    assert divide(-6, 3) == -2\n    with pytest.raises(ValueError, match=\"zero\"):\n        divide(1, 0)\n    with pytest.raises(TypeError):\n        divide(\"bad\", 2)\n\n@pytest.mark.parametrize(\"value,expected\", [(-1, 0), (0, 0), (3, 3), (5, 5), (6, 5)])\ndef test_clamp(value, expected):\n    assert clamp(value, 0, 5) == expected\n\ndef test_invalid_bounds():\n    with pytest.raises(ValueError, match=\"lower\"):\n        clamp(1, 5, 0)\n"
-  }
-]

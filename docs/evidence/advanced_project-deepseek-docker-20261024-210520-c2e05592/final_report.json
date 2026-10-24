@@ -1,0 +1,229 @@
+{
+  "project": "advanced_project",
+  "status": "FINISH",
+  "demo": false,
+  "reason": "Real pytest and required coverage accepted by independent diagnosis",
+  "error": null,
+  "test_version": 1,
+  "repair_rounds": 0,
+  "coverage_rounds": 0,
+  "execution_backend": "docker",
+  "execution": {
+    "returncode": 0,
+    "stdout": "........................................................................ [ 56%]\n.......................................................                  [100%]\n================================ tests coverage ================================\n_______________ coverage: platform linux, python 3.13.16-final-0 _______________\n\nCoverage JSON written to file .testpilot/coverage.json\n127 passed in 1.49s\n",
+    "stderr": "",
+    "traceback": "",
+    "backend": "docker",
+    "timed_out": false,
+    "passed": 127,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "collected_test_cases": 127,
+    "duration_seconds": 2.1996158999972977,
+    "warnings": []
+  },
+  "coverage": {
+    "line_coverage": 99.19354838709677,
+    "branch_coverage": 100.0,
+    "missing_lines": {
+      "coupon.py": [],
+      "errors.py": [],
+      "inventory.py": [],
+      "models.py": [],
+      "order_service.py": [
+        14
+      ],
+      "pricing.py": []
+    },
+    "missing_branches": {
+      "coupon.py": [],
+      "errors.py": [],
+      "inventory.py": [],
+      "models.py": [],
+      "order_service.py": [],
+      "pricing.py": []
+    }
+  },
+  "feedback": {
+    "failure_category": "PASS",
+    "diagnosis": "Collected 127 tests, 127 passed, 0 failed, 0 errors, 0 skipped (exit code 0). Line coverage 99.19% and branch coverage 100%, both far above the configured thresholds (80% line, 70% branch). The single uncovered line is order_service.py:14 (the body of current_time, the real wall-clock default clock), which is intentionally non-deterministic and correctly avoided by injecting a clock; its selection as the default is verified by test_init_defaults_clock_to_module_current_time. Independent quality observation: tests are behavior-focused across all six modules, cover boundaries (inclusive minimum, exclusive expiry, half-cent ROUND_HALF_UP, coupon-replaces-VIP, floor-at-zero), validation ordering, atomic all-or-nothing reservation, and non-reservation on failure; coupon/dataclass immutability is exercised. Contracts in source docstrings match asserted behavior (e.g., coupon returns fixed value exceeding subtotal while pricing floors at zero). No weakened assertions or forced-green patterns observed.",
+    "suggested_action": "PASS",
+    "evidence_refs": [
+      "versions/001/execution.json",
+      "versions/001/coverage.json",
+      "versions/001/tests.json"
+    ],
+    "review_required": false,
+    "uncertainty": "The uncovered current_time body is inferred from the coverage missing-lines list only; its real-time behavior is not exercised, but this is by design (injected clock) and not a defect signal. No traceback or stderr present to suggest hidden failures.",
+    "test_version": 1,
+    "execution_ref": "versions/001/execution.json",
+    "coverage_ref": "versions/001/coverage.json",
+    "diagnosis_status": "completed"
+  },
+  "model_calls": [
+    {
+      "agent": "generation",
+      "task": "PLAN",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 7579,
+      "status": "completed",
+      "response_chars": 9556
+    },
+    {
+      "agent": "generation",
+      "task": "PLAN",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 11650,
+      "status": "completed",
+      "response_chars": 2568
+    },
+    {
+      "agent": "generation",
+      "task": "PLAN",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 20601,
+      "status": "completed",
+      "response_chars": 8225
+    },
+    {
+      "agent": "generation",
+      "task": "PLAN",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 25622,
+      "status": "completed",
+      "response_chars": 7004
+    },
+    {
+      "agent": "generation",
+      "task": "PLAN",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 43769,
+      "status": "completed",
+      "response_chars": 6754
+    },
+    {
+      "agent": "generation",
+      "task": "PLAN",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 49091,
+      "status": "completed",
+      "response_chars": 9767
+    },
+    {
+      "agent": "generation",
+      "task": "GENERATE",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 52733,
+      "status": "completed",
+      "response_chars": 7723
+    },
+    {
+      "agent": "generation",
+      "task": "GENERATE",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 54870,
+      "status": "completed",
+      "response_chars": 3118
+    },
+    {
+      "agent": "generation",
+      "task": "GENERATE",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 64035,
+      "status": "completed",
+      "response_chars": 5531
+    },
+    {
+      "agent": "generation",
+      "task": "GENERATE",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 66079,
+      "status": "completed",
+      "response_chars": 5105
+    },
+    {
+      "agent": "generation",
+      "task": "GENERATE",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 82099,
+      "status": "completed",
+      "response_chars": 6634
+    },
+    {
+      "agent": "generation",
+      "task": "GENERATE",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 86965,
+      "status": "completed",
+      "response_chars": 7015
+    },
+    {
+      "agent": "execution",
+      "task": "DIAGNOSE",
+      "attempt": 1,
+      "model": "deepseek-flash",
+      "max_tokens": 50000,
+      "context_chars": 98625,
+      "status": "completed",
+      "response_chars": 1471
+    }
+  ],
+  "config": {
+    "llm": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "max_retries": 2,
+      "timeout_seconds": 60.0,
+      "max_tokens": 50000
+    },
+    "execution": {
+      "preferred_runner": "docker",
+      "allow_local_fallback": false,
+      "timeout_seconds": 30.0,
+      "install_dependencies": false,
+      "install_timeout_seconds": 180.0,
+      "docker_image": "testpilot-runner:latest"
+    },
+    "agent": {
+      "max_repair_rounds": 2,
+      "context_max_chars": 100000
+    },
+    "coverage": {
+      "enabled": true,
+      "line_threshold": 80,
+      "branch_threshold": 70,
+      "max_improvement_rounds": 2
+    }
+  },
+  "limitations": [
+    "Snapshots are evidence, not resumable checkpoints",
+    "Only generated tests execute; original test suite is preserved",
+    "Static preflight is not a security sandbox; Local is for trusted code",
+    "Assertion preservation is conservative, not proof of semantic correctness"
+  ]
+}

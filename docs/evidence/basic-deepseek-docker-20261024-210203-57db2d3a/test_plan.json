@@ -1,0 +1,95 @@
+[
+  {
+    "target": "calculator.py",
+    "cases": [
+      {
+        "category": "normal",
+        "description": "Divide two nonzero numbers returns the quotient",
+        "target_symbol": "calculator.divide",
+        "input_strategy": "parametrize representative nonzero divisor pairs, e.g. (10, 2) -> 5.0",
+        "expected_behavior": "Returns a / b as a float quotient",
+        "priority": 1,
+        "behavior_id": "divide.normal_quotient",
+        "setup": "Import divide from calculator",
+        "additional_categories": []
+      },
+      {
+        "category": "boundary",
+        "description": "Zero divisor raises ValueError with message",
+        "target_symbol": "calculator.divide",
+        "input_strategy": "call divide with b=0 (and negative/positive a to confirm it's the divisor check)",
+        "expected_behavior": "Raises ValueError with message 'divisor must not be zero'",
+        "priority": 1,
+        "behavior_id": "divide.zero_divisor",
+        "setup": "Import divide from calculator; use pytest.raises(ValueError, match=...)",
+        "additional_categories": []
+      },
+      {
+        "category": "normal",
+        "description": "Clamp returns lower bound when value is below range",
+        "target_symbol": "calculator.clamp",
+        "input_strategy": "call clamp with value strictly less than lower, e.g. clamp(0.0, 1.0, 5.0)",
+        "expected_behavior": "Returns lower",
+        "priority": 1,
+        "behavior_id": "clamp.below_lower",
+        "setup": "Import clamp from calculator",
+        "additional_categories": []
+      },
+      {
+        "category": "normal",
+        "description": "Clamp returns upper bound when value is above range",
+        "target_symbol": "calculator.clamp",
+        "input_strategy": "call clamp with value strictly greater than upper, e.g. clamp(10.0, 1.0, 5.0)",
+        "expected_behavior": "Returns upper",
+        "priority": 1,
+        "behavior_id": "clamp.above_upper",
+        "setup": "Import clamp from calculator",
+        "additional_categories": []
+      },
+      {
+        "category": "normal",
+        "description": "Clamp returns value unchanged when within range",
+        "target_symbol": "calculator.clamp",
+        "input_strategy": "call clamp with value strictly between lower and upper, e.g. clamp(3.0, 1.0, 5.0)",
+        "expected_behavior": "Returns value",
+        "priority": 1,
+        "behavior_id": "clamp.within_range",
+        "setup": "Import clamp from calculator",
+        "additional_categories": []
+      },
+      {
+        "category": "boundary",
+        "description": "Clamp treats lower and upper bounds as inclusive",
+        "target_symbol": "calculator.clamp",
+        "input_strategy": "parametrize value == lower and value == upper with valid bounds, e.g. clamp(1.0,1.0,5.0) and clamp(5.0,1.0,5.0)",
+        "expected_behavior": "Returns value unchanged at both inclusive bounds",
+        "priority": 1,
+        "behavior_id": "clamp.inclusive_bounds",
+        "setup": "Import clamp from calculator",
+        "additional_categories": []
+      },
+      {
+        "category": "invalid",
+        "description": "Inverted bounds raise ValueError",
+        "target_symbol": "calculator.clamp",
+        "input_strategy": "call clamp with lower > upper, e.g. clamp(2.0, 5.0, 1.0)",
+        "expected_behavior": "Raises ValueError with message 'lower exceeds upper'",
+        "priority": 1,
+        "behavior_id": "clamp.inverted_bounds",
+        "setup": "Import clamp from calculator; use pytest.raises(ValueError, match=...)",
+        "additional_categories": []
+      },
+      {
+        "category": "boundary",
+        "description": "Equal bounds form a valid single-point range",
+        "target_symbol": "calculator.clamp",
+        "input_strategy": "call clamp with lower == upper and value different from that bound, e.g. clamp(3.0, 5.0, 5.0)",
+        "expected_behavior": "Does not raise; returns the shared bound (5.0) since value is below lower",
+        "priority": 2,
+        "behavior_id": "clamp.equal_bounds",
+        "setup": "Import clamp from calculator",
+        "additional_categories": []
+      }
+    ]
+  }
+]

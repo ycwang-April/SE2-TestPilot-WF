@@ -1,0 +1,16 @@
+{
+  "failure_category": "PASS",
+  "diagnosis": "All 48 collected tests passed with returncode 0 (0 failures, 0 errors, 0 skips) in 0.46s. Line and branch coverage both hit 100% across discount.py, models.py, and order.py, with no missing lines or branches. Test intent maps cleanly onto source contracts: discount_rate member precedence (0.2 for members regardless of total), inclusive >=100 threshold for non-members (0.1), sub-threshold zero rate, and ValueError on negative totals; Item.subtotal validates negatives at call time and returns price*quantity; order_total sums subtotals, applies discount, and rounds to two decimals. Boundary cases (exact 100.0, 99.99 vs 100.01, default quantity, zero values, mutated negative quantity) are independently and meaningfully covered rather than trivially duplicated.",
+  "suggested_action": "PASS",
+  "evidence_refs": [
+    "versions/001/tests.json",
+    "versions/001/execution.json",
+    "versions/001/coverage.json"
+  ],
+  "review_required": false,
+  "uncertainty": "None material. Coverage is complete and tests are behaviorally distinct. Minor untested edge: order_total with an all-zero-subtotal negative path via discount_rate is not directly exercised, but discount_rate's negative guard and Item validation are each independently covered, so residual risk is negligible.",
+  "test_version": 1,
+  "execution_ref": "versions/001/execution.json",
+  "coverage_ref": "versions/001/coverage.json",
+  "diagnosis_status": "completed"
+}

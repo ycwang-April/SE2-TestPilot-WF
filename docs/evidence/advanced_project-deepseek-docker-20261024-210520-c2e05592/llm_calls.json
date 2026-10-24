@@ -1,0 +1,132 @@
+[
+  {
+    "agent": "generation",
+    "task": "PLAN",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 7579,
+    "status": "completed",
+    "response_chars": 9556
+  },
+  {
+    "agent": "generation",
+    "task": "PLAN",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 11650,
+    "status": "completed",
+    "response_chars": 2568
+  },
+  {
+    "agent": "generation",
+    "task": "PLAN",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 20601,
+    "status": "completed",
+    "response_chars": 8225
+  },
+  {
+    "agent": "generation",
+    "task": "PLAN",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 25622,
+    "status": "completed",
+    "response_chars": 7004
+  },
+  {
+    "agent": "generation",
+    "task": "PLAN",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 43769,
+    "status": "completed",
+    "response_chars": 6754
+  },
+  {
+    "agent": "generation",
+    "task": "PLAN",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 49091,
+    "status": "completed",
+    "response_chars": 9767
+  },
+  {
+    "agent": "generation",
+    "task": "GENERATE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 52733,
+    "status": "completed",
+    "response_chars": 7723
+  },
+  {
+    "agent": "generation",
+    "task": "GENERATE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 54870,
+    "status": "completed",
+    "response_chars": 3118
+  },
+  {
+    "agent": "generation",
+    "task": "GENERATE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 64035,
+    "status": "completed",
+    "response_chars": 5531
+  },
+  {
+    "agent": "generation",
+    "task": "GENERATE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 66079,
+    "status": "completed",
+    "response_chars": 5105
+  },
+  {
+    "agent": "generation",
+    "task": "GENERATE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 82099,
+    "status": "completed",
+    "response_chars": 6634
+  },
+  {
+    "agent": "generation",
+    "task": "GENERATE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 86965,
+    "status": "completed",
+    "response_chars": 7015
+  },
+  {
+    "agent": "execution",
+    "task": "DIAGNOSE",
+    "attempt": 1,
+    "model": "deepseek-flash",
+    "max_tokens": 50000,
+    "context_chars": 98625,
+    "status": "completed",
+    "response_chars": 1471
+  }
+]

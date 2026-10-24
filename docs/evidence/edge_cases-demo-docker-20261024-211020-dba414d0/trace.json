@@ -1,0 +1,158 @@
+[
+  {
+    "step": 1,
+    "agent": "generation",
+    "task": "INITIAL_GENERATION",
+    "test_version": 1,
+    "status": "COMPLETED",
+    "input_message": null,
+    "output_messages": [
+      "74c28db816e4494babc6c00aa41f7da5"
+    ],
+    "repair_count": 0,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "DEMO_FIXED_RESPONSE",
+    "llm_calls": [],
+    "evidence_refs": [
+      "versions/001/tests.json"
+    ]
+  },
+  {
+    "step": 2,
+    "agent": "execution",
+    "task": "PREFLIGHT/EXECUTE/DIAGNOSE",
+    "test_version": 1,
+    "status": "COMPLETED",
+    "input_message": "74c28db816e4494babc6c00aa41f7da5",
+    "output_messages": [
+      "f2452cce2d7d46f29ec9b95ed580bcf6"
+    ],
+    "repair_count": 0,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "DEMO_FIXED_RESPONSE",
+    "llm_calls": [],
+    "evidence_refs": [
+      "versions/001/tests.json",
+      "versions/001/execution.json",
+      "versions/001/coverage.json"
+    ]
+  },
+  {
+    "step": 3,
+    "agent": "controller",
+    "test_version": 1,
+    "decision": {
+      "mode": "REPAIR_TESTS",
+      "repair_count": 1,
+      "route": "generation"
+    },
+    "repair_count": 1,
+    "coverage_round": 0
+  },
+  {
+    "step": 4,
+    "agent": "generation",
+    "task": "REPAIR_TESTS",
+    "test_version": 2,
+    "status": "COMPLETED",
+    "input_message": "f2452cce2d7d46f29ec9b95ed580bcf6",
+    "output_messages": [
+      "4c77442c71ad46d78bccab8876bf78da"
+    ],
+    "repair_count": 1,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "DEMO_FIXED_RESPONSE",
+    "llm_calls": [],
+    "evidence_refs": [
+      "versions/002/tests.json"
+    ]
+  },
+  {
+    "step": 5,
+    "agent": "execution",
+    "task": "PREFLIGHT/EXECUTE/DIAGNOSE",
+    "test_version": 2,
+    "status": "COMPLETED",
+    "input_message": "4c77442c71ad46d78bccab8876bf78da",
+    "output_messages": [
+      "c2f91fb9cc814aea8645971a225fad82"
+    ],
+    "repair_count": 1,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "DEMO_FIXED_RESPONSE",
+    "llm_calls": [],
+    "evidence_refs": [
+      "versions/002/tests.json",
+      "versions/002/execution.json",
+      "versions/002/coverage.json"
+    ]
+  },
+  {
+    "step": 6,
+    "agent": "controller",
+    "test_version": 2,
+    "decision": {
+      "mode": "IMPROVE_COVERAGE",
+      "coverage_round": 1,
+      "route": "generation"
+    },
+    "repair_count": 1,
+    "coverage_round": 1
+  },
+  {
+    "step": 7,
+    "agent": "generation",
+    "task": "IMPROVE_COVERAGE",
+    "test_version": 3,
+    "status": "COMPLETED",
+    "input_message": "c2f91fb9cc814aea8645971a225fad82",
+    "output_messages": [
+      "12507fc3302d4982a82cac7f86821721"
+    ],
+    "repair_count": 1,
+    "coverage_round": 1,
+    "error": null,
+    "llm_mode": "DEMO_FIXED_RESPONSE",
+    "llm_calls": [],
+    "evidence_refs": [
+      "versions/003/tests.json"
+    ]
+  },
+  {
+    "step": 8,
+    "agent": "execution",
+    "task": "PREFLIGHT/EXECUTE/DIAGNOSE",
+    "test_version": 3,
+    "status": "COMPLETED",
+    "input_message": "12507fc3302d4982a82cac7f86821721",
+    "output_messages": [
+      "4e9e6d7452f6485491140aaa058309e5"
+    ],
+    "repair_count": 1,
+    "coverage_round": 1,
+    "error": null,
+    "llm_mode": "DEMO_FIXED_RESPONSE",
+    "llm_calls": [],
+    "evidence_refs": [
+      "versions/003/tests.json",
+      "versions/003/execution.json",
+      "versions/003/coverage.json"
+    ]
+  },
+  {
+    "step": 9,
+    "agent": "controller",
+    "test_version": 3,
+    "decision": {
+      "workflow_status": "FINISH",
+      "route": "end",
+      "reason": "Real pytest and required coverage accepted by independent diagnosis"
+    },
+    "repair_count": 1,
+    "coverage_round": 1
+  }
+]

@@ -1,0 +1,173 @@
+[
+  {
+    "step": 1,
+    "agent": "generation",
+    "task": "INITIAL_GENERATION",
+    "test_version": 1,
+    "status": "COMPLETED",
+    "input_message": null,
+    "output_messages": [
+      "ee44424333d14614861f79dda41dc4b9"
+    ],
+    "repair_count": 0,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "MODEL",
+    "llm_calls": [
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 7579,
+        "status": "completed",
+        "response_chars": 9556
+      },
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 11650,
+        "status": "completed",
+        "response_chars": 2568
+      },
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 20601,
+        "status": "completed",
+        "response_chars": 8225
+      },
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 25622,
+        "status": "completed",
+        "response_chars": 7004
+      },
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 43769,
+        "status": "completed",
+        "response_chars": 6754
+      },
+      {
+        "task": "PLAN",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 49091,
+        "status": "completed",
+        "response_chars": 9767
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 52733,
+        "status": "completed",
+        "response_chars": 7723
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 54870,
+        "status": "completed",
+        "response_chars": 3118
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 64035,
+        "status": "completed",
+        "response_chars": 5531
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 66079,
+        "status": "completed",
+        "response_chars": 5105
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 82099,
+        "status": "completed",
+        "response_chars": 6634
+      },
+      {
+        "task": "GENERATE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 86965,
+        "status": "completed",
+        "response_chars": 7015
+      }
+    ],
+    "evidence_refs": [
+      "versions/001/tests.json"
+    ]
+  },
+  {
+    "step": 2,
+    "agent": "execution",
+    "task": "PREFLIGHT/EXECUTE/DIAGNOSE",
+    "test_version": 1,
+    "status": "COMPLETED",
+    "input_message": "ee44424333d14614861f79dda41dc4b9",
+    "output_messages": [
+      "e95e33a73ff84f079733c6f5aa95aad5"
+    ],
+    "repair_count": 0,
+    "coverage_round": 0,
+    "error": null,
+    "llm_mode": "MODEL",
+    "llm_calls": [
+      {
+        "task": "DIAGNOSE",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "max_tokens": 50000,
+        "context_chars": 98625,
+        "status": "completed",
+        "response_chars": 1471
+      }
+    ],
+    "evidence_refs": [
+      "versions/001/tests.json",
+      "versions/001/execution.json",
+      "versions/001/coverage.json"
+    ]
+  },
+  {
+    "step": 3,
+    "agent": "controller",
+    "test_version": 1,
+    "decision": {
+      "workflow_status": "FINISH",
+      "route": "end",
+      "reason": "Real pytest and required coverage accepted by independent diagnosis"
+    },
+    "repair_count": 0,
+    "coverage_round": 0
+  }
+]
