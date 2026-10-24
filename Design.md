@@ -1,148 +1,192 @@
-# TestPilot-WF Design
+# TestPilot-WF V1.2 设计说明
 
-## 1. H1 与 H2 的边界
+## 1. 总体架构与复用边界
 
-H1 是单 Agent + 确定性 Controller + 多工具节点。H2 保留 H1 包，使用两个独立业务 Agent，每个角色有自己的目标、prompt、模型实例、结构化输入输出与调用记录。Controller 不是第三个 Agent。
-
-Generation 使用 H1 AgentNodes 的 analyze/plan/generate/repair/improve **内部工具方法**，没有 Runner；不会运行 H1 graph/controller/execute。Execution 不拥有测试写权限，负责独立诊断。H1 DeepSeekClient 仅添加两个可覆盖的类属性 `system_prompt`、`task_prompts`，默认保持 H1 行为。精确 Patch、保留用例、去重、AST、上下文、Runner 等继续复用。
-
-来源与源码审计见 [H1-Audit.md](docs/H1-Audit.md)。H1 原仓库未修改，Git 历史、密钥、旧证据均未复制。
-
-## 2. 角色与工具权限
-
-| 角色 | 独立任务 | 工具 | 输出 |
-|---|---|---|---|
-| Generation | INITIAL_GENERATION / REPAIR_TESTS / IMPROVE_COVERAGE | Scanner、AST、ContextSelector、精确 Patch、候选校验 | GenerationResult、测试版本与内容摘要 |
-| Execution | PREFLIGHT / EXECUTE / DIAGNOSE | preflight、TestRunner、CoverageAnalyzer、诊断模型 | 工具事实与 ExecutionFeedback |
-| Controller | 事实验收、预算、路由 | 无 LLM | FINISH / FAIL / REVIEW_REQUIRED 或回到 Generation |
-
-Generation prompt 强调有意义断言、源代码契约和反馈；Execution prompt 强调证据引用、失败归因、疑似源码缺陷和不确定性。通过路径也调用 `ExecutionLLM.diagnose`。两个角色可使用同一模型服务，但不共享对话或客户端实例。模型本身只返回数据，不具备任意工具执行能力。
-
-## 3. 消息契约与版本
-
-`AgentMessage` 的 sender/receiver/type 为固定方向；`payload` 为 GenerationResult 或 ExecutionFeedback。Pydantic 禁止多余字段，校验 payload 类型、方向和版本；消息有唯一 ID、连续逻辑 sequence、证据引用。
-
-- GenerationResult：模式、版本、计划、tests_ref、SHA-256 摘要、摘要说明、告警。
-- ExecutionFeedback：版本、execution_ref、coverage_ref、分类、原因、动作、证据引用、review_required、uncertainty、diagnosis_status。
-- 分类：PASS、REPAIR_TEST、IMPROVE_COVERAGE、SUSPECTED_SOURCE_BUG、ENVIRONMENT_ERROR、REVIEW_REQUIRED、DIAGNOSIS_ERROR。
-
-模型只返回 Diagnosis；版本和文件引用由可信代码绑定，不能由模型伪造版本。引用必须来自当轮提供的白名单。pytest 原始事实先落盘，再调用诊断模型。
-
-版本只在**完整候选通过验证、内容确实变化并提交**后递增。失败候选保存在 rejected/repairs，旧测试保持不变。Execution 校验最新消息、版本、内容摘要；Generation 拒绝旧反馈；Controller 再次检查版本和实际测试摘要。
-
-## 4. 共享状态与写入职责
-
-WorkflowState 继承 H1 AgentState 以复用工具接口，增加 mode、test_version、test_digest、generation、feedback、messages、workflow_status、trace、extensions。继承的 H1 status/history/执行历史不是 H2 控制依据，运行中不积累大型执行历史。H2 权威终态为 workflow_status。
-
-Generation 只更新项目分析、计划、测试、版本、生成结果、告警和发送消息；Execution 只更新执行、覆盖率、诊断和发送消息；Controller 更新预算、模式、路由和终态。框架 wrapper 校验返回键的写权限，深拷贝输入避免原地修改共享状态。扩展 Agent 在当前版本只能写 namespaced extensions，由其他节点读取，不能篡改测试或版本。
-
-每版本完整测试和工具事实在磁盘保存；消息使用引用，当前内存仅保留当前执行事实。上下文遵守 H1 字符预算，超限显式失败，不静默截断 JSON。
-
-## 5. LangGraph 与确定性路由
+H2 在 H1 工具层之上增加双 Agent 协作与 LangGraph 编排。Generation 与 Execution 是两个正式业务 Agent；Controller 是确定性策略函数，报告生成是 Service 的收尾逻辑，均不调用额外 LLM。
 
 ```mermaid
-sequenceDiagram
-    participant G as Generation Agent
-    participant S as Shared WorkflowState
-    participant E as Execution Agent
-    participant C as Controller
-    G->>S: Commit v1 + GenerationResult
-    S->>E: Current tests + digest + plan
-    E->>E: Preflight, pytest, coverage, independent diagnosis
-    E->>S: ExecutionFeedback(v1) + evidence refs
-    S->>C: Current facts and diagnosis
-    alt Confirmed test defect and budget
-        C->>G: REPAIR_TESTS(v1 feedback)
-        G->>S: Validated atomic commit v2
-        S->>E: Re-execute v2
-    else Passing tests with low coverage and budget
-        C->>G: IMPROVE_COVERAGE
-        G->>S: Append tests, commit next version
-        S->>E: Re-execute all generated tests
-    else Source defect or uncertainty
-        C->>S: REVIEW_REQUIRED
-    else Objective pass and diagnosis agree
-        C->>S: FINISH
-    else Error or exhausted budget
-        C->>S: FAIL
-    end
+flowchart TB
+    UI[CLI / Streamlit] --> Service[run_project / observer / ArtifactWriter]
+    Service --> Graph[StateGraph - WorkflowState]
+    Graph --> G[Generation Agent]
+    G --> E[Execution Agent]
+    E --> C{Deterministic Controller}
+    C -->|REPAIR_TESTS / IMPROVE_COVERAGE| G
+    C -->|FINISH / FAIL / REVIEW_REQUIRED| End([END])
+    End --> Report[Service 写入最终报告]
+    G --> Tools[H1 分析 / 上下文 / 测试编辑工具]
+    E --> Runner[Docker 或显式 Local / pytest / coverage]
 ```
 
-`StateGraph(WorkflowState)` 的顺序链由 WorkflowBuilder 集中构造。业务节点失败直接到 Controller，避免继续执行旧测试。修复/补测默认全局各 2 轮；配置上限各 10，graph recursion limit 随链长度和预算计算。
+核心实现：[agents.py](testpilot_wf/agents.py)、[llm.py](testpilot_wf/llm.py)、[service.py](testpilot_wf/service.py)、[workflow.py](testpilot_wf/workflow.py)。Generation 复用 H1 `AgentNodes` 的 analyze、plan、generate、repair、improve_coverage 方法，不运行 H1 的 graph、Controller 或 execute。Execution 使用既有 Runner 与 CoverageAnalyzer。H1 客户端提供可覆盖的角色 Prompt，H2 适配器分别设置独立角色约束。
 
-Controller 不盲信 PASS：returncode、timed_out、failed、errors、实际通过/收集数量、覆盖率及版本都必须满足约束。全部 skip/零通过/未知收集统计不能成功。模型 PASS 但覆盖率不足仍进入补测；模型 PASS 但执行失败进入 REVIEW_REQUIRED。REPAIR 需要真实 traceback 和模型明确归因，疑似源码缺陷停止自动修复。
+## 2. 两个 Agent 的职责
 
-## 6. 修复和生成防护
+| 角色 | 任务与工具 | 允许更新的业务状态 | 不承担的职责 |
+|---|---|---|---|
+| Generation | `INITIAL_GENERATION`、`REPAIR_TESTS`、`IMPROVE_COVERAGE`；扫描、AST、上下文、精确 Patch、候选校验 | 项目分析、目标模块、计划、测试、生成结果、版本、digest、消息和 warnings | 没有 Runner，不执行 pytest，不自行决定跨 Agent 路由 |
+| Execution | `PREFLIGHT` → `EXECUTE` → `DIAGNOSE`；验证已提交测试、真实执行、覆盖率分析、独立诊断 | `execution_result`、`coverage`、`feedback`、`messages` | 不编辑测试或被测源码，不修改预算或版本 |
+| Controller | 校验事实、诊断一致性与剩余预算 | 模式、计数、route、workflow_status、reason | 不调用 LLM，不修改测试 |
 
-保留 H1 单文件精确 old/new Patch、唯一匹配、非重叠修改、原子提交、测试函数及参数行保留机制。H2 额外 preflight 拒绝语法错误、skip/xfail 装饰器、明显进程/网络调用；保守比较已有 assert 和 pytest.raises 的 AST，拒绝修改或移除。
+两个角色分别创建 GenerationLLM、ExecutionLLM，使用不同 system/task Prompt 和结构化输出 Schema。它们可以调用同一模型服务，独立性体现为职责、客户端和上下文约束，不表示不同模型权重。LLM 只返回结构化数据，可信 Python Agent 代码才拥有受控工具调用能力。
 
-当前策略宁愿停止，也不自动改错误期望值。局部修复允许导入、准备代码等更正；Demo 用导入别名修复拼写错误，完全保留原断言。补测只追加新文件，不将未提交候选伪装成可执行版本。
+Execution 复用 H1 `ContextSelector` 的 `IMPROVE_COVERAGE` 证据选择分支，以取得 `existing_tests`、`execution` 和 `coverage`；发送给 Execution LLM 前将 `action` 明确设为 **`DIAGNOSE`**，并补充 test_version、test_plan、evidence_refs、environment_error、coverage_policy。既有字符预算和输出校验继续生效，源码见 [agents.py](testpilot_wf/agents.py)，对应测试见 [test_execution_context.py](tests/wf/test_execution_context.py)。
 
-Generation.invoke 对 H2 preflight 内容错误最多额外尝试一次（两轮候选）。分析和规划不重复；每轮从分析/规划后的同一合法状态深拷贝，拒绝候选不能进入下一轮的 existing_tests。可选结构化 validation_feedback 携带来源、错误类型、候选文件名、可用行号、脱敏错误和保留语义要求；真实 execution_agent_feedback 独立保留，H1 的局部修复验证信息也不会丢失。只有最终完整校验通过才提交一次版本、digest 和一个正式消息，Controller 预算不变。
+## 3. 结构化协议与共享状态
 
-断言保护与无变化检查优先于可重试 preflight。API/源码分析/上下文/状态错误和 H1 内部校验失败不进入该新循环，保留其原有有限重试或终止方式；特别是 Repair 的语法残缺替换可能先被 H1 retain_tests 拒绝，此时不增加外层重试。INITIAL 和 IMPROVE 新文件的语法错误、三种模式中通过已有保护但违反 H2 导入/标记规则的候选可得到本地反馈。多模块任务重试整个本轮候选生成，最多两轮不等于最多两次模型请求，原 API/格式重试预算未改动。
+协议定义见 [schemas.py](testpilot_wf/schemas.py)。Pydantic 消息与诊断契约禁止多余字段，并校验诊断分类、建议动作、复核标志和消息方向；共享状态的写入边界另由 Service wrapper 检查。
 
-失败候选分别保存在 rejected/<节点序号>-attempt-01/02.json；第二次成功记录和该轮 H1 repair 证据保存在 generation_attempts/，避免覆盖第一轮。恢复成功的消息摘要、warnings 和既有 Trace evidence_refs 可追踪这些记录。两次失败明确报出候选预算耗尽，不提交版本；所有产物继续由 ArtifactWriter 脱敏。
+| 协议 | 关键字段与约束 |
+|---|---|
+| `Diagnosis` | failure_category、diagnosis、suggested_action、evidence_refs、review_required、uncertainty；分类与动作须一致，源码缺陷/不确定性分类须要求复核 |
+| `ExecutionFeedback` | 继承 Diagnosis；增加 test_version、execution_ref、coverage_ref、diagnosis_status |
+| `GenerationResult` | mode、test_version、test_plan、tests_ref、digest、summary、warnings |
+| `AgentMessage` | 唯一 message_id、连续 sequence、sender、receiver、message_type、test_version、payload、evidence_refs；envelope 与 payload 版本必须一致 |
+| `WorkflowState` | 继承 H1 AgentState，增加 mode、test_version、test_digest、generation、feedback、messages、workflow_status、route、trace、extensions 等 |
 
-AST 启发式不能证明语义安全（例如 helper、fixture 或参数值变化也可能改变断言含义），因此不能宣传为形式化验证或安全沙箱。被测代码需可信，未知上传代码应坚持 Docker 隔离，不允许自动 Local 回退。
+正式消息只有两个方向：
 
-## 7. 可扩展性
+```text
+Generation -> Execution : generation_result / GenerationResult
+Execution  -> Generation: execution_feedback / ExecutionFeedback
+```
 
-AgentProtocol 约定 `name`、`writes`、`invoke(state) -> dict`。AgentRegistry 提供注册、查询、显式替换。WorkflowBuilder 接受已注册名称组成的受控顺序链，要求 generation 起始、execution 结束，禁止重复和未注册节点。
+Controller 决策属于 Trace，不是 AgentMessage；扩展节点也不能新增正式消息发送者。Service 每次合并更新后重新验证状态，并检查消息序号和 ID 唯一性。
 
-新增观察节点示例（不用修改 Generation/Execution）：
+诊断分类包括 PASS、REPAIR_TEST、IMPROVE_COVERAGE、SUSPECTED_SOURCE_BUG、ENVIRONMENT_ERROR、REVIEW_REQUIRED、DIAGNOSIS_ERROR。模型只产生 Diagnosis，可信代码绑定版本和执行/覆盖率引用，且拒绝诊断引用当轮白名单之外的证据。工具事实在模型调用前落盘，即使诊断失败也保留。
+
+H2 的控制依据是 `workflow_status`、`mode`、反馈及实际事实，不是继承自 H1 的 `status/history`。`state.json` 是精简观察快照，不是可恢复 checkpoint。
+
+## 4. 测试版本与候选提交
+
+首次合法测试集提交为 v1；每次合法修复或补测提交后递增一次。`digest()` 对按路径、内容组成的测试集合计算 SHA-256。Generation 拒绝没有实际变化的候选；Execution 验证最新 GenerationResult、消息、版本和实际 digest；Controller 再核验反馈版本、最新正式消息和测试 digest。
+
+候选提交前执行 preflight、测试保留和已有断言保护。实现见 [validation.py](testpilot_wf/validation.py)：禁止 skip/xfail、部分进程/网络导入与动态执行；比较已有 assert 和 pytest.raises 的 AST，拒绝删除或修改。修复尽量使用 H1 的精确 old/new Patch，补测保留已有测试。不会通过修改生产源码、弱化期望值或跳过测试强行通过。
+
+Generation 本地自修正只覆盖明确来自 H2 `preflight()` 的候选内容错误，最多额外尝试一次：
+
+1. 初始分析与规划后保存合法基线，每轮复制基线生成候选。
+2. 保留拒绝候选及脱敏错误，通过独立 `validation_feedback` 提供给第二轮。
+3. 真实 `execution_agent_feedback` 继续保留，不用本地反馈伪造 pytest 事实。
+4. 第二轮仍执行完整验证；只有最终接受才提交一个版本及一条正式消息。
+5. 两轮失败安全终止；源码分析、API、状态、无变化、断言保护和 H1 内部校验错误不进入这层重试。
+
+该预算独立于 Controller 的 Repair/Coverage 计数。两轮候选不等于两次 API 请求：多模块任务及既有 API/格式重试可能包含多次调用。对应代码与测试：[GenerationAgent](testpilot_wf/agents.py)、[test_generation_preflight.py](tests/wf/test_generation_preflight.py)。
+
+## 5. 确定性 Controller 与反馈循环
+
+[controller.py](testpilot_wf/controller.py) 的决策基于实际状态，模型不能直接设置最终 route。
+
+| 条件 | 路由或终态 |
+|---|---|
+| 节点错误、反馈缺失/过期、digest 或最新消息不匹配、诊断失败 | FAIL |
+| 疑似源码缺陷、证据不足或显式要求人工复核 | REVIEW_REQUIRED |
+| 环境异常、超时、特定 Runner/收集失败、无实际通过或收集记录 | FAIL |
+| pytest 失败，诊断明确为测试缺陷，有 traceback 且 Repair 预算允许 | 计数加一，`REPAIR_TESTS`，回 Generation |
+| pytest 失败但诊断与事实冲突 | REVIEW_REQUIRED |
+| pytest 通过但所需覆盖率缺失 | FAIL |
+| 覆盖率不足，诊断为 PASS/IMPROVE_COVERAGE 且预算允许 | 计数加一，`IMPROVE_COVERAGE`，回 Generation |
+| 对应预算耗尽 | FAIL |
+| 实际通过/收集、退出码、错误数、覆盖率与 PASS 诊断一致 | FINISH |
+
+默认 Repair 和 Coverage Improvement 各最多 2 轮，配置允许各 0–10 轮。每次反馈循环重新执行完整配置链，对新版本运行整个生成测试集。模型 PASS 但覆盖率不足仍会补测；源码疑点不会被自动当作测试错误修复。
+
+保存的 [Demo Trace](docs/evidence/edge_cases-demo-docker-20261024-211020-dba414d0/trace.json) 展示：
+
+```text
+Generation(v1) -> Execution(REPAIR_TEST)       -> Controller(REPAIR_TESTS)
+Generation(v2) -> Execution(IMPROVE_COVERAGE)  -> Controller(IMPROVE_COVERAGE)
+Generation(v3) -> Execution(PASS)              -> Controller(FINISH)
+```
+
+这条证据的 LLM 响应是固定脚本，三轮 pytest/coverage 是真实 Docker 执行；四组真实模型实验均在 v1 完成，不能将两类结论混用。
+
+## 6. Registry、Builder 与前后置扩展
+
+`AgentProtocol` 约定 `name`、`writes`、`invoke(state) -> dict`。AgentRegistry 支持注册、查询与显式 `replace=True` 替换；`run_project(extra_agents=...)` 的额外注册默认不替换同名 Agent。空白、非字符串、保留名和含 `:` / `|` 的名称会被拒绝。
+
+WorkflowBuilder 接受受控顺序链，要求：
+
+- Generation 是首节点，Execution 必须存在；节点名称全部唯一，因此二者均只出现一次。
+- 所有 Agent 已注册；Controller、START、END 不能混入普通 Agent 链。
+- Execution 可以位于链中间；链尾固定连接独立 Controller。
+- 任一非末节点发生错误时直接到 Controller，跳过余下节点；末节点错误也交由 Controller 终止。
+- 修复/补测只返回 Generation，重新按链执行，不提供任意条件边或并行拓扑。
+
+```text
+默认：   Generation -> Execution -> Controller
+前置：   Generation -> Audit -> Execution -> Controller
+后置：   Generation -> Execution -> Audit -> Controller
+组合：   Generation -> Before -> Execution -> After -> Controller
+```
+
+下面是使用已有接口的最小扩展示例，不增加正式 LLM Agent。可在项目根目录启动 Python 后执行；`AppConfig()` 使用内置默认值，实际实验配置见各运行报告。
 
 ```python
-class AuditAgent:
-    name = "audit"
+from testpilot.config import AppConfig
+from testpilot_wf.service import run_project
+
+
+class MockAuditAgent:
     writes = {"extensions"}
 
+    def __init__(self, name="audit"):
+        self.name = name
+
     def invoke(self, state):
-        return {"extensions": {**state.extensions, "audit": state.test_version}}
+        observation = {
+            "seen_version": state.test_version,
+            "seen_digest": state.test_digest,
+            "has_feedback": state.feedback is not None,
+        }
+        return {"extensions": {**state.extensions, self.name: observation}}
 
 
 state = run_project(
     "examples/basic",
+    config=AppConfig(),
     demo=True,
-    extra_agents=[AuditAgent()],
-    chain=("generation", "audit", "execution"),
+    extra_agents=[MockAuditAgent()],
+    chain=("generation", "execution", "audit"),
 )
 ```
 
-测试验证 MockAgent 被实际 LangGraph 调用、接收版本和摘要、输出状态得到保留、原有两个 Agent 无须修改。扩展点是有限顺序链，不是任意图编辑器；新业务需更多共享字段时，应显式扩展 schema/权限，而非任意覆写已有字段。
+前置时改为 `chain=("generation", "audit", "execution")`。组合链需分别注册 `MockAuditAgent("before")` 和 `MockAuditAgent("after")`。前置节点在首轮尚无反馈，在后续轮次可能读到上一版本反馈；后置节点能观察当轮 ExecutionFeedback，扩展逻辑应核对版本，不能把“存在反馈”直接当作“反馈属于当前版本”。
 
-## 8. 日志、UI 与错误恢复
+## 7. 扩展状态隔离、预算与异常
 
-复用 ArtifactWriter.json 的环境敏感值脱敏、H1 运行目录命名及下载助手。trace 记录 Agent、任务、输入输出消息 ID、版本、预算、状态、错误和 Controller 决策；llm_calls 记录分角色任务、尝试、模型、状态，失败调用也保留。界面在 Generation 开始及 Execution 各阶段发布真实 observer 状态。
+Service wrapper 向节点传入深拷贝，只合并 `invoke()` 返回的更新，并依次校验声明的 `writes` 与扩展专用限制：普通扩展**只能返回 `extensions`**，即使自己声明拥有其他字段也不能越权。因此不能修改 generated_tests、test_version、test_digest、messages、feedback、execution_result、coverage、repair_count、coverage_round、route、workflow_status。
 
-临时 API/结构化格式错误使用继承的有限重试。无法取得有效诊断则 DIAGNOSIS_ERROR，保留执行事实并 FAIL。Docker/依赖错误安全失败，没有无授权恢复到 Local 的路径。环境修复后需要用户重新运行，不支持持久化续跑。
+后置扩展不会覆盖正式 ExecutionFeedback 或追加 AgentMessage，Controller 仍读取 Execution 的最新消息并执行原有版本、digest、pytest/coverage 和预算校验。扩展执行记录进入 Trace，任务标记为 `EXTENSION`。
 
-## 9. 测试与局限
+`extensions` 是可自由组织的字典；按 Agent 名分子键是约定，不是强制的子键权限系统。返回值会替换整个字段，扩展示例显式合并既有数据。节点可读取状态副本；写权限隔离不等于隐藏状态或对 Python 插件实施安全沙箱。
 
-### UI 状态投影（2026-10-23）
+节点异常或权限错误由 wrapper 回滚本次更新、记录 error/failure_stage，再经 Controller 安全终止。非法注册会在装配阶段被拒绝；图构建/运行异常由 Service 的外层错误边界记录 FAIL。图递归上限为：
 
-`ui_state.py` 将既有 WorkflowState、Trace、AgentMessage 和最终报告投影为只读展示数据；`ui.py` 负责 Graphviz、当前状态、Timeline、Communication 和产物展示。本次没有调整 service、Schema、Agent、Controller 或 LangGraph 拓扑。
+```text
+(len(chain) + 1) * (1 + max_repair_rounds + max_improvement_rounds) + 5
+```
 
-Graphviz 使用固定标签及状态白名单，圆角节点以灰/蓝/绿/红/琥珀区分状态；反馈路径使用虚线。节点完成与 Workflow 成功分开处理。Report 是 UI 中的产物节点，成功解析终态 final_report.json 且存在 final_report.md 后才按 FINISH / FAIL / REVIEW_REQUIRED 着色并强调；只有 Controller 终止而报告未生成时，不高亮 Report。页面重绘读取同一运行目录的最终产物，优先于界面当前所选配置。
+该上限随链长度与预算调整；扩展节点本身不消耗 Repair/Coverage 次数，也不能改写计数。扩展验证代码见 [test_workflow.py](tests/wf/test_workflow.py)，现存 [24 项通过日志](docs/evidence/extensibility/mock_agent_tests.txt) 支持前置、后置、组合链、反馈保留、预算、越权及异常路径。
 
-Timeline 按 trace.json 原顺序保留每一次 Agent 运行和 Controller 路由；临时 PREFLIGHT / EXECUTE / DIAGNOSE 只显示为 observer 观察，不新增持久化 Trace。Report FINALIZED 行是验证产物存在后追加的 UI 记录，不声称它是 LangGraph 节点。长历史默认显示最近 12 条，可展开全部。
+## 8. 观察、证据与报告时序
 
-Communication 按 messages.json 原顺序展示消息方向、版本、类型、任务/反馈与摘要，默认显示最近 8 条并可展开全部。Controller 决策仍仅属于 Trace，不伪造 AgentMessage。运行期间 session_state 保存只读展示快照；重新运行清除旧快照和旧运行引用。下载控件仅在最终结果区域构造，避免 observer 多次渲染导致重复 widget ID。
+Service 的 observer 发布节点开始/完成与 Controller 决策，Execution 的 progress 发布临时 PREFLIGHT、EXECUTE、DIAGNOSE 快照。内部阶段通知不新增正式 Trace 事件。
 
-UI 结果、缺失产物、不同终态、Demo/Real 模式、重新渲染及再次运行均有自动化验收。说明和截图见 [UI-Validation](docs/UI-Validation.md)。
+- [CLI](testpilot_wf/cli.py) 以阶段、Trace 长度、版本和轮次去重状态，以消息 ID 去重通信，以 Trace step 去重决策；使用 `flush=True` 实时输出。Generation 只展示真实任务模式，不虚构内部阶段。
+- [Streamlit](testpilot_wf/ui.py) / [只读投影](testpilot_wf/ui_state.py) 展示 Workflow、状态、Timeline 和通信；会重新读取最终产物，并在新运行时清空旧状态。Report 是 UI 产物节点，不是第三个 Agent。
+- Controller 终止后，Service 才写最终 JSON、相关产物与 Markdown，并再次发布状态。CLI 在 `run_project()` 返回后校验报告可读性、状态及版本匹配；报告错误按 CLI 错误处理，不改底层 WorkflowState。
 
-### UI 状态投影（2026-10-23）
+每版本保存测试、执行、覆盖率、反馈；顶层保存消息、Trace、模型调用、最终报告与精简状态。ArtifactWriter 脱敏已知环境敏感值；不会把完整 Prompt 写入常规 CLI 输出。日志引用及验证口径见 [Validation](docs/Validation.md)。
 
-`ui_state.py` 将既有 WorkflowState、Trace、AgentMessage 和最终报告投影为只读展示数据；`ui.py` 负责 Graphviz、当前状态、Timeline、Communication 和产物展示。本次没有调整 service、Schema、Agent、Controller 或 LangGraph 拓扑。
+## 9. 架构取舍与限制
 
-Graphviz 使用固定标签及状态白名单，圆角节点以灰/蓝/绿/红/琥珀区分状态；反馈路径使用虚线。节点完成与 Workflow 成功分开处理。Report 是 UI 中的产物节点，成功解析终态 final_report.json 且存在 final_report.md 后才按 FINISH / FAIL / REVIEW_REQUIRED 着色并强调；只有 Controller 终止而报告未生成时，不高亮 Report。页面重绘读取同一运行目录的最终产物，优先于界面当前所选配置。
+- 复用 H1 状态与工具可减少重复实现，但 H1/H2 状态字段并存，需明确 H2 的权威控制字段。
+- 确定性 Controller 约束模型建议，仍不能证明模型诊断、测试期望或源码契约正确；不确定性必须留给人工检查。
+- AST 保留与 preflight 是保守启发式，helper、fixture、参数等变化仍可能影响语义；高覆盖率不是正确性证明。
+- 只运行新生成测试，不自动运行被测项目原套件；默认不安装项目依赖，复杂项目需准备兼容执行环境。
+- Local 无宿主隔离，Docker 也不是生产级多租户沙箱；扩展 Python Agent 应被信任。环境失败不自动回退 Local。
+- 当前扩展点是有界顺序链，不支持任意 DAG、自由多 Agent 对话、并行或热插拔；保存快照不支持断点续跑。
+- 原生 Streamlit 数据单元格已居中，表头独立居中未实现；不通过高风险内部 DOM/Canvas 修改伪装成功。
 
-Timeline 按 trace.json 原顺序保留每一次 Agent 运行和 Controller 路由；临时 PREFLIGHT / EXECUTE / DIAGNOSE 只显示为 observer 观察，不新增持久化 Trace。Report FINALIZED 行是验证产物存在后追加的 UI 记录，不声称它是 LangGraph 节点。长历史默认显示最近 12 条，可展开全部。
-
-Communication 按 messages.json 原顺序展示消息方向、版本、类型、任务/反馈与摘要，默认显示最近 8 条并可展开全部。Controller 决策仍仅属于 Trace，不伪造 AgentMessage。运行期间 session_state 保存只读展示快照；重新运行清除旧快照和旧运行引用。下载控件仅在最终结果区域构造，避免 observer 多次渲染导致重复 widget ID。
-
-UI 结果、缺失产物、不同终态、Demo/Real 模式、重新渲染及再次运行均有自动化验收。说明和截图见 [UI-Validation](docs/UI-Validation.md)。
-
-见 [Validation](docs/Validation.md) 的真实结果。普通测试禁外网，用 Fake/Mock LLM；运行真实 subprocess/pytest/coverage；Docker Demo 也真实执行工具。真实 DeepSeek + Docker 集成入口已提供，但因用户确认旧 API 已删除，本次未执行。
-
-只执行生成套件，不运行项目自带测试；Local 无隔离；Docker 不是生产级多租户沙箱；默认不自动安装项目依赖。未实现并行、拖拽编排、断点续跑，均不属于本次 V1.2 的必需范围。UI 使用本地路径与内置示例，H1 的上传组件保留在原包中，H2 不暴露上传入口。
+本轮文档整理只核对源码与现存证据，不修改实现，也不把已删除的历史日志当作当前验收结果。
