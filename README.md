@@ -161,3 +161,14 @@ Remove-Item Env:TESTPILOT_RUN_INTEGRATION
 | [Sample_Video.mp4](Sample_Video.mp4) | 约 59.21 秒的演示视频；播放核对说明见 Demo 文档 |
 
 新运行保存到 `runs/<项目>-<模式>-<后端>-<时间>-<ID>/`，该目录被 Git 忽略。主要产物包括 `versions/<版本>/` 下的测试、执行、覆盖率和反馈，及顶层 `messages.json`、`trace.json`、`llm_calls.json`、`test_plan.json`、`generated_tests/`、`final_report.json`、`final_report.md`。候选拒绝与局部恢复证据另存于 `rejected/`、`repairs/`、`generation_attempts/`；`state.json` 仅用于观察，不支持断点续跑。证据收集脚本为 [collect_wf_evidence.py](scripts/collect_wf_evidence.py)。
+
+## 作业评分项对应
+
+依据 Homework 2 官方 PPT 的四个评分维度，项目选择“代码 → 生成测试 → 执行”方向。基本顺序流程为必需项；条件分支、反馈循环、状态追踪与错误恢复为已实现的推荐项，不包含并行执行。
+
+| 评分项 | 代码与验证依据 |
+| --- | --- |
+| 流程完整性 40% | [Workflow](testpilot_wf/workflow.py) · [Controller](testpilot_wf/controller.py) · [Demo 三轮验证](docs/Validation.md#3-demo--docker-反馈循环) |
+| Agent 协作 30% | [Agents](testpilot_wf/agents.py) · [消息与状态协议](testpilot_wf/schemas.py) · [Real 调用验证](docs/Validation.md#21-两个角色的实际调用记录) |
+| 可扩展性 20% | [扩展接口与编排](testpilot_wf/workflow.py) · [扩展测试](tests/wf/test_workflow.py) · [专项日志：24 passed](docs/evidence/extensibility/mock_agent_tests.txt) |
+| 文档 10% | [Design](Design.md) · [Validation](docs/Validation.md) · [Demo 与视频说明](docs/Demo.md#5-一分钟视频与讲解建议) |
