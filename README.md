@@ -69,7 +69,7 @@ docker build -t testpilot-runner:latest .
 镜像定义见 [Dockerfile](Dockerfile)，内置 pytest 和 pytest-cov。项目配置见 [config.yaml](config.yaml)，校验规则见 [config.py](testpilot/config.py)。当前仓库配置为：
 
 | 配置 | 当前值 |
-|---|---|
+| :---: | :---: |
 | 模型 | `deepseek-flash` |
 | 单次输出上限 / 上下文字符预算 | 50000 tokens / 100000 characters |
 | 行 / 分支覆盖率阈值 | 80% / 70% |
@@ -82,7 +82,7 @@ docker build -t testpilot-runner:latest .
 ## Real DeepSeek 与 Demo
 
 | 模式 | Generation / Execution 的模型响应 | pytest / coverage | API Key |
-|---|---|---|---|
+| :---: | :---: | :---: | :---: |
 | Real：不带 `--demo` | 两个独立角色实际调用 DeepSeek | 真实执行 | 需要 |
 | Demo：带 `--demo` | 内置固定响应，不调用 LLM | 真实执行 | 不需要 |
 
@@ -119,7 +119,7 @@ python -m streamlit run testpilot_wf/ui.py
 以下为仓库现存报告中的**最终生成测试集**结果，不是模型生成成功率，也不代表源码无缺陷。通过率按 `passed / collected_test_cases` 计算，覆盖率按选定目标模块汇总。详细索引、调用记录与统计口径见 [Validation](docs/Validation.md)。
 
 | 模式 / 项目 | Workflow | 通过 / 收集 | 通过率 | 行 / 分支覆盖率 | 最终版本；修复 / 补测 |
-|---|---|---:|---:|---:|---|
+| :---: | :---: | :---: | :---: | :---: | :---: |
 | Real / basic | FINISH | 14 / 14 | 100% | 100% / 100% | v1；0 / 0 |
 | Real / advanced_project | FINISH | 127 / 127 | 100% | 99.19% / 100% | v1；0 / 0 |
 | Real / edge_cases | FINISH | 19 / 19 | 100% | 100% / 100% | v1；0 / 0 |
@@ -152,7 +152,7 @@ Remove-Item Env:TESTPILOT_RUN_INTEGRATION
 ## 目录与证据
 
 | 路径 | 内容 |
-|---|---|
+| :---: | :---: |
 | [testpilot/](testpilot/) | H1 复用工具、Runner、Schema 和兼容入口 |
 | [testpilot_wf/](testpilot_wf/) | H2 Agent、协议、Controller、Builder、Service、CLI 和 UI |
 | [tests/wf/](tests/wf/) | H2 协作、路由、扩展、候选恢复、CLI 和 UI 测试 |
@@ -167,7 +167,7 @@ Remove-Item Env:TESTPILOT_RUN_INTEGRATION
 依据 Homework 2 官方 PPT 的四个评分维度，项目选择“代码 → 生成测试 → 执行”方向。基本顺序流程为必需项；条件分支、反馈循环、状态追踪与错误恢复为已实现的推荐项，不包含并行执行。
 
 | 评分项 | 代码与验证依据 |
-| --- | --- |
+| :---: | :---: |
 | 流程完整性 40% | [Workflow](testpilot_wf/workflow.py) · [Controller](testpilot_wf/controller.py) · [Demo 三轮验证](docs/Validation.md#3-demo--docker-反馈循环) |
 | Agent 协作 30% | [Agents](testpilot_wf/agents.py) · [消息与状态协议](testpilot_wf/schemas.py) · [Real 调用验证](docs/Validation.md#21-两个角色的实际调用记录) |
 | 可扩展性 20% | [扩展接口与编排](testpilot_wf/workflow.py) · [扩展测试](tests/wf/test_workflow.py) · [专项日志：24 passed](docs/evidence/extensibility/mock_agent_tests.txt) |
