@@ -1,4 +1,4 @@
-# TestPilot-WF V1.2
+# TestPilot-WF
 
 《软件工程与项目实践》Homework 2：基于 LangGraph 的双 Agent 自动化测试工作流。Generation Agent 负责测试设计与编辑，Execution Agent 负责真实执行和独立诊断，确定性 Controller 根据执行事实、反馈和预算决定继续修复、补测或终止。
 
@@ -11,20 +11,21 @@
 ## 核心功能与架构
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 24, "rankSpacing": 32}}}%%
 flowchart TB
-    UI["CLI / Streamlit"] --> S["Service · run_project"]
+    UI["CLI / Streamlit"] --> S["Service"]
 
     subgraph WF["LangGraph Workflow"]
-        G["Generation Agent<br/>独立 LLM · 设计与编辑"]
-        E["Execution Agent<br/>独立 LLM · 执行与诊断"]
-        C{"Controller<br/>确定性路由 · 无 LLM"}
+        G["Generation Agent<br/>生成 · 修复"]
+        E["Execution Agent<br/>执行 · 诊断"]
+        C{"Controller<br/>路由决策"}
         T(["FINISH / FAIL<br/>REVIEW_REQUIRED"])
-        W[("WorkflowState<br/>版本 · digest · AgentMessage")]
+        W[("WorkflowState<br/>状态 · 消息")]
 
-        G -->|提交测试 · GenerationResult| E
-        E -->|事实与反馈| C
-        C -->|REPAIR_TESTS · Repair 预算| G
-        C -->|IMPROVE_COVERAGE · Coverage 预算| G
+        G -->|提交测试| E
+        E -->|执行证据| C
+        C -->|Repair| G
+        C -->|Coverage| G
         C --> T
         G -.- W
         E -.- W
@@ -32,9 +33,9 @@ flowchart TB
     end
 
     S --> G
-    G -.-> H["H1 Tools<br/>Analysis · AST · Patch"]
-    E -.-> D["Docker Runner<br/>pytest · coverage"]
-    T --> R["Service 收尾<br/>Final Report<br/>Trace · Messages · Coverage"]
+    G -.-> H["H1 Tools<br/>AST · Patch"]
+    E -.-> D["Docker<br/>pytest · coverage"]
+    T --> R["Reports<br/>Trace · Coverage"]
 
     classDef agent fill:#dbeafe,stroke:#2563eb,color:#172554,stroke-width:2px;
     classDef control fill:#ede9fe,stroke:#7c3aed,color:#2e1065,stroke-width:2px;
@@ -45,7 +46,7 @@ flowchart TB
     style WF fill:transparent,stroke:#94a3b8
 ```
 
-实线为执行顺序与条件路由，虚线为共享状态关联或工具依赖，不代表额外路由。正式消息为 Generation → Execution 的 `generation_result` 与 Execution → Generation 的 `execution_feedback`；Controller 读取 WorkflowState，不是消息接收 Agent。图示默认 Docker 路径，可信代码可显式选择 Local。
+实线为执行顺序与条件路由，虚线为共享状态关联或工具依赖，不代表额外路由。正式消息为 Generation → Execution 的 `generation_result` 与 Execution → Generation 的 `execution_feedback`；Controller 读取 WorkflowState，不是消息接收 Agent。图中 Repair 对应 `REPAIR_TESTS`，Coverage 对应 `IMPROVE_COVERAGE`，两条路径使用独立预算；Reports 是 Service 的收尾产物。图示默认 Docker 路径，可信代码可显式选择 Local。
 
 - **独立职责**：两个角色使用独立客户端与不同 Prompt、结构化输出约束；可以使用同一 DeepSeek 模型服务，不共享角色对话。
 - **真实执行**：Execution 按 PREFLIGHT → EXECUTE → DIAGNOSE 工作，pytest/coverage 事实先保存，再提供给诊断模型。模型的 PASS 不能覆盖客观失败。
@@ -56,11 +57,11 @@ flowchart TB
 
 ## 环境安装与配置
 
-需要 Python **3.11+**。Docker 执行需要 Docker Desktop 或兼容 Docker Engine，并使用 Linux 容器。以下 PowerShell 命令均在项目根目录执行：
+需要 Python **3.11+**，以下使用 Conda 创建 Python **3.13** 环境。Docker 执行需要 Docker Desktop 或兼容 Docker Engine，并使用 Linux 容器：
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+conda create -n testpilot-wf python=3.13 -y
+conda activate testpilot-wf
 python -m pip install -e ".[web,dev]"
 docker build -t testpilot-runner:latest .
 ```
@@ -85,7 +86,7 @@ docker build -t testpilot-runner:latest .
 | Real：不带 `--demo` | 两个独立角色实际调用 DeepSeek | 真实执行 | 需要 |
 | Demo：带 `--demo` | 内置固定响应，不调用 LLM | 真实执行 | 不需要 |
 
-真实模式优先读取进程环境变量 `DEEPSEEK_API_KEY`，否则读取**启动目录** `.env` 中同名字段。参考 [.env.example](.env.example)，只在本地填写有效密钥；`.env` 已在 [.gitignore](.gitignore) 中排除。真实模式会向模型服务发送选定源码、测试及执行上下文，并产生 API 费用。不要把密钥写入配置、报告或提交材料。
+真实模式优先读取进程环境变量 `DEEPSEEK_API_KEY`，否则读取**启动目录** `.env` 中同名字段。参考 [.env.example](.env.example)，只在本地填写有效密钥；`.env` 已在 [.gitignore](.gitignore) 中排除。
 
 ```powershell
 # 离线模型响应 + Docker 真实执行，演示修复和补测
@@ -160,5 +161,3 @@ Remove-Item Env:TESTPILOT_RUN_INTEGRATION
 | [Sample_Video.mp4](Sample_Video.mp4) | 约 59.21 秒的演示视频；播放核对说明见 Demo 文档 |
 
 新运行保存到 `runs/<项目>-<模式>-<后端>-<时间>-<ID>/`，该目录被 Git 忽略。主要产物包括 `versions/<版本>/` 下的测试、执行、覆盖率和反馈，及顶层 `messages.json`、`trace.json`、`llm_calls.json`、`test_plan.json`、`generated_tests/`、`final_report.json`、`final_report.md`。候选拒绝与局部恢复证据另存于 `rejected/`、`repairs/`、`generation_attempts/`；`state.json` 仅用于观察，不支持断点续跑。证据收集脚本为 [collect_wf_evidence.py](scripts/collect_wf_evidence.py)。
-
-设计限制：仅执行新生成的测试集合；断言 AST 保留是保守启发式；高覆盖率不等于测试质量保证；Local 无宿主隔离；Docker 非生产级多租户安全沙箱。未实现并行 Agent、任意 DAG 编辑或运行恢复。
